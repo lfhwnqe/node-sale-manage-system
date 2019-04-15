@@ -16,9 +16,6 @@ module.exports = appInfo => {
     options: {},
   };
   
-  config.jwt = {
-    secret: "node_sale"
-  };
 
   // use for cookie sign key, should change to your own and keep security
   config.keys = appInfo.name + '_1555131754056_7256';
