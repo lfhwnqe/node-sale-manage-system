@@ -19,50 +19,35 @@ class OrderController extends Controller {
           required: true
         },
         totalPrice: {
-          type: 'number',
+          type: 'string',
           required: true
         },
         tagPrice: {
-          type: 'number',
+          type: 'string',
           required: true
         },
         saleTime: {
           type: 'string',
-          required: true,
           allowEmpty: true
         }
       })
-
       const result = await ctx.service.order.insertOrder(ctx.request.body)
       ctx.body = {
         data: result,
         success: true
       }
     } catch (err) {
-      let errorMsg;
+      let msg;
       if (err.code === 'invalid_param') {
-        errorMsg = '请输入必填项'
+        msg = '请输入必填项'
       }
-      ctx.logger.warn(errorMsg);
+      ctx.logger.warn(err);
       ctx.body = {
         success: false,
-        msg: errorMsg
+        msg
       };
       return;
     }
-    // const {
-    //   // 商品品类
-    //   productName,
-    //   // 商品数量
-    //   amount,
-    //   // 实际总价
-    //   totalPrice,
-    //   // 吊牌总价
-    //   tagPrice,
-    //   // 出售时间
-    //   saleTime
-    // } = ctx.request.body;
-
   }
 
   async getOrderList() {

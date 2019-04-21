@@ -33,7 +33,7 @@ module.exports = (option) => {
       app.emit('error', err, this);
       // 从 error 对象上读出各个属性，设置到响应中
       ctx.body = {
-        error_msg,
+        msg,
         code: -1
       };
       ctx.body.success = false;

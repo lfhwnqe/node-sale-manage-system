@@ -4,20 +4,6 @@ module.exports = app => {
     var mongoose = app.mongoose;
     var Schema = mongoose.Schema;
     var OrderSchema = new Schema({
-      username: {
-        type: String,
-        require: true,
-        max: 64,
-        min: [0, '必须输入用户名'],
-        unique: true
-      },
-      password: {
-        type: String,
-        require: true,
-        min: [0, '必须输入密码'],
-        max: 32
-      },
-
       productName: {
         type: String,
         require: true,
@@ -41,12 +27,16 @@ module.exports = app => {
       },
       saleTime: {
         type: Date,
-        default: Date.now,
+        // default: Date.now,
       },
       // 备注
       remark: {
         type: String,
         max: 320,
+      },
+      createTime: {
+        type: Date,
+        default: Date.now,
       },
     });
     return mongoose.model('Order', OrderSchema);

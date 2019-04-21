@@ -5,9 +5,18 @@ const Service = require('egg').Controller;
 class OrderService extends Service {
 
   async insertOrder(params) {
-    const order = new this.ctx.model.Order();
-    const insertOrderResult = await order.save(params)
-    return insertOrderResult.id;
+    try {
+      if (!params.saleTime) {
+        params.saleTime === Date.parse(Date.now())
+      } else {
+        params.saleTime === Date.parse(params.saleTime)
+      }
+      console.log('params:',params)
+      const insertOrderResult = await this.ctx.model.Order.create(params)
+      return insertOrderResult;
+    } catch (err) {
+      throw new Error(err)
+    }
   }
 
   async getOrderList(params) {

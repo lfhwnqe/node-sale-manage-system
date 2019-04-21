@@ -7,8 +7,8 @@ class UserController extends Controller {
     const {
       ctx
     } = this;
-    const username = ctx.request.body.username;
-    const password = ctx.request.body.password;
+    const username = ctx.request.query.username;
+    const password = ctx.request.query.password;
     if (!username || !password) {
       throw new Error('参数缺失');
       return;

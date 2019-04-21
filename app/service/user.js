@@ -18,7 +18,7 @@ class UserService extends Service {
 
   async createUser(username, password) {
     const user = new this.ctx.model.User();
-    const userIsExist = await this.ctx.model.User.find({
+    const userIsExist = await this.ctx.model.User.findOne({
       username,
       password
     });
