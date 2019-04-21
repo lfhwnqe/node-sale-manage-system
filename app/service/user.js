@@ -8,7 +8,7 @@ class UserService extends Service {
   }
 
   async login(username, password) {
-    const user = await this.ctx.model.User.find({
+    const user = await this.ctx.model.User.findOne({
       username,
       password
     });
