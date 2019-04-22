@@ -38,6 +38,10 @@ module.exports = app => {
         type: Date,
         default: Date.now,
       },
+      userId: {
+        type: String,
+        require: true
+      }
     });
     return mongoose.model('Order', OrderSchema);
   } catch (e) {

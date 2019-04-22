@@ -31,7 +31,13 @@ class OrderController extends Controller {
           allowEmpty: true
         }
       })
-      const result = await ctx.service.order.insertOrder(ctx.request.body)
+      const params = ctx.request.body
+      const userId = ctx.cookies.get('userinfo', {
+        signed: false,
+        encrypt: true
+      })
+      params.userId = userId
+      const result = await ctx.service.order.insertOrder(params)
       ctx.body = {
         data: result,
         success: true
@@ -54,7 +60,13 @@ class OrderController extends Controller {
     const {
       ctx
     } = this
-    const result = await ctx.service.order.getOrderList(ctx.request.body)
+    const params = ctx.request.query
+    const userId = ctx.cookies.get('userinfo', {
+      signed: false,
+      encrypt: true
+    })
+    params.userId = userId
+    const result = await ctx.service.order.getOrderList(params)
     ctx.body = {
       data: result,
       success: true

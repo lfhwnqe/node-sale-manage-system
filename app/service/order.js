@@ -11,7 +11,6 @@ class OrderService extends Service {
       } else {
         params.saleTime === Date.parse(params.saleTime)
       }
-      console.log('params:',params)
       const insertOrderResult = await this.ctx.model.Order.create(params)
       return insertOrderResult;
     } catch (err) {
@@ -19,11 +18,31 @@ class OrderService extends Service {
     }
   }
 
-  async getOrderList(params) {
-    const orderList = await this.ctx.model.Order.find();
-    return orderList
+  async getOrderList({
+    pageSize = 20,
+    pageNum = 1,
+    userId
+  }) {
+    try {
+      const skip = (pageNum * 1 - 1) * pageSize
+      const orderList = await this.ctx.model.Order.find({
+        userId
+      }).sort({
+        saleTime: -1
+      }).limit(pageSize * 1).skip(skip);
+      const totalPage = await this.ctx.model.Order.find({
+        userId
+      }).count() / pageSize
+      return {
+        orderList,
+        pageNum,
+        pageSize,
+        totalPage: Math.round(totalPage)
+      }
+    } catch (err) {
+      console.log('err:', err)
+    }
   }
-
 }
 
 module.exports = OrderService;
