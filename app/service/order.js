@@ -18,29 +18,64 @@ class OrderService extends Service {
     }
   }
 
-  async getOrderList({
-    pageSize = 20,
-    pageNum = 1,
-    userId
-  }) {
+  async getOrderList(params) {
     try {
+      const {
+        pageSize = 20, pageNum = 1
+      } = params
+      const queryForm = {};
+      ['productName', 'amount', 'totalPrice', 'tagPrice', 'saleTime', 'userId'].forEach(key => {
+        if (params[key]) {
+          queryForm[key] = params[key]
+        }
+      })
+
       const skip = (pageNum * 1 - 1) * pageSize
-      const orderList = await this.ctx.model.Order.find({
-        userId
-      }).sort({
+      const orderList = await this.ctx.model.Order.find(queryForm).sort({
         saleTime: -1
       }).limit(pageSize * 1).skip(skip);
       const totalPage = await this.ctx.model.Order.find({
-        userId
+        userId: queryForm.userId
       }).count() / pageSize
       return {
         orderList,
         pageNum,
         pageSize,
-        totalPage: Math.round(totalPage)
+        totalPage: Math.floor(totalPage) + 1
       }
     } catch (err) {
       console.log('err:', err)
+    }
+  }
+  // 根据传入的时间统计日期内订单总和
+  async totalRevenueStatics(params) {
+    try {
+      const {
+        userId,
+        startTime,
+        endTime
+      } = params
+      console.log('params', params)
+      const total = await this.ctx.model.Order.aggregate([{
+        $match: {
+          userId,
+          // saleTime: {
+          //   $gte: startTime,
+          //   $lte: endTime
+          // }
+        }
+      }, {
+        $group: {
+          _id: null,
+          totalCount: {
+            $sum: '$totalPrice'
+          }
+        }
+      }])
+
+      return total
+    } catch (err) {
+      console.log('error in mongodb:', err)
     }
   }
 }

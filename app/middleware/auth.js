@@ -16,6 +16,7 @@ module.exports = (option) => {
         }
         return
       }
+      ctx.userinfo = userinfo
       const userIsExist = await ctx.model.User.findOne({
         _id: userinfo
       });
