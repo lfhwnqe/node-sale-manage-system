@@ -12,23 +12,42 @@ class HomeController extends Controller {
     ctx.body = 'hi, egg';
   }
 
+  /* 
+   * 主页获取销量统计
+   * 获取近30天，近7天的销售总额，销售数量的统计
+   */
   async geTotalRevenueStatics() {
     const {
       ctx
     } = this
-    const params = {
-      startTime: '',
-      endTime: '',
-      userId: ''
+    const baseParams = {
+      userId: ctx.userinfo,
+      endTime: moment(new Date()).format(),
+    }
+    const near30DaysParams = {
+      ...baseParams,
+      startTime: moment(new Date()).add(-30, 'days').format()
     }
 
-    params.userId = ctx.userinfo
-    params.startTime = moment(new Date()).format();
-    params.endTime = moment(new Date()).add(-30, 'days').format();
+    const near7DaysParams = {
+      ...baseParams,
+      startTime: moment(new Date()).add(-7, 'days').format()
+    }
 
-    const count = await ctx.service.order.totalRevenueStatics(params)
+    const todayParams = {
+      ...baseParams,
+      startTime: moment().startOf('day').format()
+    }
+
+    const near30DaysStatics = await ctx.service.order.totalRevenueStatics(near30DaysParams)
+    const near7DaysStatics = await ctx.service.order.totalRevenueStatics(near7DaysParams)
+    const todayStatics = await ctx.service.order.totalRevenueStatics(todayParams)
+
     ctx.body = {
-      count
+      success: true,
+      near30DaysStatics,
+      near7DaysStatics,
+      todayStatics
     }
   }
 }

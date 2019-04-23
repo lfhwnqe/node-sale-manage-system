@@ -55,25 +55,30 @@ class OrderService extends Service {
         startTime,
         endTime
       } = params
-      console.log('params', params)
       const total = await this.ctx.model.Order.aggregate([{
-        $match: {
-          userId,
-          // saleTime: {
-          //   $gte: startTime,
-          //   $lte: endTime
-          // }
-        }
-      }, {
-        $group: {
-          _id: null,
-          totalCount: {
-            $sum: '$totalPrice'
+          $match: {
+            userId,
+            'saleTime': {
+              // 这里需要加上new Date() mongodb才能解析日期
+              '$gte': new Date(startTime),
+              '$lt': new Date(endTime)
+            }
           }
-        }
-      }])
+        },
+        {
+          $group: {
+            '_id': null,
+            'totalCount': {
+              '$sum': '$totalPrice',
+            },
+            'totalAmount': {
+              '$sum': '$amount'
+            }
+          }
+        },
+      ])
 
-      return total
+      return total[0]
     } catch (err) {
       console.log('error in mongodb:', err)
     }
