@@ -20,7 +20,8 @@ module.exports = {
   async task(ctx) {
     // 生成前一日账单为excel文件
     const params = {
-      startTime: moment().startOf('day').format()
+      // startTime: moment().startOf('day').format()
+      startTime: moment(new Date()).add(-1, 'days').format(),
     }
     const data = await ctx.service.order.totalRevenueStatics(params)
     // 获取所有数据
@@ -31,18 +32,20 @@ module.exports = {
       pageSize: 999
     })
     const orderListExcelData = orderList.map((item, index) => {
-      return [index + 1, item.productName, item.amount, item.totalPrice, item.tagPrice, item.saleTime, item.remark]
+      return [index + 1, item.productName, item.amount, item.totalPrice, item.tagPrice, moment(item.saleTime).format(), item.remark]
     })
     const excelData = [
-      ['序号', '商品名称', '商品数量', '实际出售价格', '吊牌价格', '出售时间', '备注'],
+      ['序号', '商品名称', '商品数量/斤', '实际出售价格/元', '吊牌价格/元', '出售时间', '备注'],
       ...orderListExcelData,
-      ['', '', '', '', '', '总量', '总价格'],
+      ['', '', '', '', '', '总量/斤', '总价格/元'],
       ['', '', '', '', '', data.totalAmount, data.totalCount]
     ]
+    console.log('excelData:', excelData)
     const buffer = xlsx.build([{
       name: "mySheetName",
       data: excelData
     }])
+    
 
     const fileName = `./data_files/${new Date().toLocaleDateString()}销售数据统计.xlsx`
     fs.writeFile(fileName, buffer, (err => {
