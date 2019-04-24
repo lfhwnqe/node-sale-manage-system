@@ -4,6 +4,7 @@ module.exports = app => {
     var mongoose = app.mongoose;
     var Schema = mongoose.Schema;
     var OrderSchema = new Schema({
+      // 商品名称
       productName: {
         type: String,
         require: true,
@@ -25,6 +26,7 @@ module.exports = app => {
         type: Number,
         require: true,
       },
+      // 出售时间
       saleTime: {
         type: Date,
         // default: Date.now,

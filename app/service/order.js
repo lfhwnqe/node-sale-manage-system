@@ -24,8 +24,13 @@ class OrderService extends Service {
         pageSize = 20, pageNum = 1
       } = params
       const queryForm = {};
-      ['productName', 'amount', 'totalPrice', 'tagPrice', 'saleTime', 'userId'].forEach(key => {
-        if (params[key]) {
+      ['productName', 'amount', 'totalPrice', 'tagPrice', 'saleTimeStart', 'userId'].forEach(key => {
+        if (params['saleTimeStart']) {
+          queryForm['saleTime'] = {
+            // 这里需要加上new Date() mongodb才能解析日期
+            '$gte': new Date(params['saleTimeStart'])
+          }
+        } else if (params[key]) {
           queryForm[key] = params[key]
         }
       })
@@ -55,13 +60,15 @@ class OrderService extends Service {
         startTime,
         endTime
       } = params
-      const total = await this.ctx.model.Order.aggregate([{
+      const queries = [{
           $match: {
-            userId,
+            userId: userId ? userId : {
+              '$exists': true
+            },
             'saleTime': {
               // 这里需要加上new Date() mongodb才能解析日期
               '$gte': new Date(startTime),
-              '$lt': new Date(endTime)
+              '$lt': endTime ? new Date(endTime) : new Date()
             }
           }
         },
@@ -76,9 +83,14 @@ class OrderService extends Service {
             }
           }
         },
-      ])
+      ]
+      const total = await this.ctx.model.Order.aggregate(queries)
 
-      return total[0]
+      return total[0] || {
+        _id: null,
+        totalCount: 0,
+        totalAmount: 0
+      }
     } catch (err) {
       console.log('error in mongodb:', err)
     }

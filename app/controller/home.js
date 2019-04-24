@@ -1,5 +1,5 @@
 'use strict';
-var moment = require('moment');
+const moment = require('moment');
 // moment().format();
 
 const Controller = require('egg').Controller;
@@ -45,9 +45,11 @@ class HomeController extends Controller {
 
     ctx.body = {
       success: true,
-      near30DaysStatics,
-      near7DaysStatics,
-      todayStatics
+      data: {
+        near30DaysStatics,
+        near7DaysStatics,
+        todayStatics
+      }
     }
   }
 }
