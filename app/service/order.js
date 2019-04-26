@@ -77,10 +77,13 @@ class OrderService extends Service {
           $group: {
             '_id': null,
             'totalCount': {
-              '$sum': '$totalPrice',
+              '$sum': '$amount',
             },
             'totalAmount': {
-              '$sum': '$amount'
+              '$sum': '$totalPrice'
+            },
+            'saleNumber': {
+              $sum: 1
             }
           }
         },
@@ -90,7 +93,8 @@ class OrderService extends Service {
       return total[0] || {
         _id: null,
         totalCount: 0,
-        totalAmount: 0
+        totalAmount: 0,
+        saleNumber: 0
       }
     } catch (err) {
       console.log('error in mongodb:', err)
