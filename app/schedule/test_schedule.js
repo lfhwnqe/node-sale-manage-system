@@ -30,8 +30,7 @@ module.exports = {
       pageSize: 999
     });
     const orderListExcelData = orderList.map((item, index) => {
-      return [index + 1, item.productName, item.amount, item.totalPrice, item.tagPrice, moment(item.saleTime)
-        .format(), item.remark];
+      return [index + 1, item.productName, item.amount, item.totalPrice, item.tagPrice, new Date(item.saleTime).toLocaleString(), item.remark];
     });
     const excelData = [
       ['序号', '商品名称', '商品数量/斤', '实际出售价格/元', '吊牌价格/元', '出售时间', '备注'],
@@ -39,7 +38,6 @@ module.exports = {
       ['', '', '', '', '', '总量/斤', '总价格/元'],
       ['', '', '', '', '', data.totalAmount, data.totalCount]
     ];
-    console.log('excelData:', excelData);
     const buffer = xlsx.build([{
       name: "mySheetName",
       data: excelData
