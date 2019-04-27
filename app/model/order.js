@@ -4,27 +4,16 @@ module.exports = app => {
     var mongoose = app.mongoose;
     var Schema = mongoose.Schema;
     var OrderSchema = new Schema({
-      // 商品名称
-      productName: {
-        type: String,
+      // 单个订单全部信息
+      ordersList: [{
+        number: Number,
+        price: Number,
+        productType: String
+      }],
+      // 该订单总金额
+      ordersTotalPrice: {
         require: true,
-        max: 64,
-        min: [0, '必须输入商品名称'],
-      },
-      // 商品数量
-      amount: {
-        type: Number,
-        require: true,
-      },
-      // 实际出售价格
-      totalPrice: {
-        type: Number,
-        require: true,
-      },
-      // 吊牌价格
-      tagPrice: {
-        type: Number,
-        require: true,
+        type: Number
       },
       // 出售时间
       saleTime: {
@@ -41,6 +30,10 @@ module.exports = app => {
         default: Date.now,
       },
       userId: {
+        type: String,
+        require: true
+      },
+      saleBy: {
         type: String,
         require: true
       }

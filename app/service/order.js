@@ -9,8 +9,15 @@ class OrderService extends Service {
       if (!params.saleTime) {
         params.saleTime = Date.parse(Date.now())
       } else {
-        params.saleTime = Date.parse(params.saleTime)
+        params.saleTime = Date.parse(new Date(params.saleTime))
       }
+      let ordersTotalPrice = 0
+      params.ordersList.forEach(order => {
+        ordersTotalPrice += order.price
+      })
+      params.ordersTotalPrice = ordersTotalPrice
+      const saleBy = await this.ctx.service.user.findUserNameByUserId(this.ctx.userinfo)
+      params.saleBy = saleBy
       // console.log('params.saleTime:', params.saleTime)
       const insertOrderResult = await this.ctx.model.Order.create(params)
       return insertOrderResult;
@@ -76,11 +83,8 @@ class OrderService extends Service {
         {
           $group: {
             '_id': null,
-            'totalCount': {
-              '$sum': '$amount',
-            },
-            'totalAmount': {
-              '$sum': '$totalPrice'
+            'totalPrice': {
+              '$sum': '$ordersTotalPrice'
             },
             'saleNumber': {
               $sum: 1

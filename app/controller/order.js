@@ -9,37 +9,22 @@ class OrderController extends Controller {
     } = this;
 
     try {
-      ctx.validate({
-        productName: {
-          type: 'string',
-          required: true
-        },
-        amount: {
-          type: 'string',
-          required: true
-        },
-        totalPrice: {
-          type: 'string',
-          required: true
-        },
-        tagPrice: {
-          type: 'string',
-          required: true
-        },
-        saleTime: {
-          type: 'string',
-          allowEmpty: true
-        }
-      })
       const params = ctx.request.body
-      const userId = ctx.cookies.get('userinfo', {
-        signed: false,
-        encrypt: true
+      const userId = ctx.userinfo
+      const form = {
+        userId
+      }
+      const paramKeys = ['ordersList', 'remark', 'saleTime']
+      paramKeys.forEach(item => {
+        // if (item === 'saleTime') {
+        //   form[item] = new Date(params[item]).toTimeString()
+        // } {
+          form[item] = params[item]
+        // }
       })
-      params.userId = userId
-      const result = await ctx.service.order.insertOrder(params)
+      const result = await ctx.service.order.insertOrder(form)
       ctx.body = {
-        data: result,
+        data: result.id,
         success: true
       }
     } catch (err) {

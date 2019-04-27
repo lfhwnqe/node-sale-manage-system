@@ -27,6 +27,17 @@ class UserService extends Service {
     user.password = password;
     return user.save();
   }
+
+  async findUserNameByUserId(userId) {
+    try {
+      const user = await this.ctx.model.User.findOne({
+        _id: userId
+      });
+      return user.username
+    } catch (err) {
+      throw new Error(err)
+    }
+  }
 }
 
 module.exports = UserService;
