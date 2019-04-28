@@ -15,6 +15,10 @@ module.exports = app => {
         require: true,
         type: Number
       },
+      // 买家电话
+      phone: {
+        type: Number
+      },
       // 出售时间
       saleTime: {
         type: Date,

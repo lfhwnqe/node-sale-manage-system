@@ -14,13 +14,9 @@ class OrderController extends Controller {
       const form = {
         userId
       }
-      const paramKeys = ['ordersList', 'remark', 'saleTime']
+      const paramKeys = ['ordersList', 'remark', 'saleTime', 'phone']
       paramKeys.forEach(item => {
-        // if (item === 'saleTime') {
-        //   form[item] = new Date(params[item]).toTimeString()
-        // } {
-          form[item] = params[item]
-        // }
+        form[item] = params[item]
       })
       const result = await ctx.service.order.insertOrder(form)
       ctx.body = {
