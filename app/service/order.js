@@ -16,9 +16,6 @@ class OrderService extends Service {
         ordersTotalPrice += order.price
       })
       params.ordersTotalPrice = ordersTotalPrice
-      const saleBy = await this.ctx.service.user.findUserNameByUserId(this.ctx.userinfo)
-      params.saleBy = saleBy
-      // console.log('params.saleTime:', params.saleTime)
       const insertOrderResult = await this.ctx.model.Order.create(params)
       return insertOrderResult;
     } catch (err) {
@@ -49,7 +46,7 @@ class OrderService extends Service {
       }).limit(pageSize * 1).skip(skip);
       const totalPage = await this.ctx.model.Order.find({
         userId: queryForm.userId
-      }).count() / pageSize
+      }).countDocuments() / pageSize
       return {
         orderList,
         pageNum,

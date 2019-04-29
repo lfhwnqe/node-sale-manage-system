@@ -25,7 +25,7 @@ class ProductService extends Service {
   }
 
   async removeProductTypeList(id) {
-    const result = await this.ctx.model.Product.remove({
+    const result = await this.ctx.model.Product.deleteOne({
       _id: id
     });
     return result

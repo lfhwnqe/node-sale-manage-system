@@ -15,7 +15,6 @@ module.exports = appInfo => {
     url: 'mongodb://127.0.0.1:27017/sale',
     options: {},
   };
-  
 
   // use for cookie sign key, should change to your own and keep security
   config.keys = appInfo.name + '_1555131754056_7256';

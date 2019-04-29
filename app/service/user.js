@@ -3,10 +3,6 @@
 const Service = require('egg').Controller;
 
 class UserService extends Service {
-  async isUserLogin() {
-    return true;
-  }
-
   async login(username, password) {
     const user = await this.ctx.model.User.findOne({
       username,
@@ -20,9 +16,8 @@ class UserService extends Service {
     const user = new this.ctx.model.User();
     const userIsExist = await this.ctx.model.User.findOne({
       username,
-      password
     });
-    if (userIsExist) throw new Error('用户名已存在')
+    if (userIsExist) throw new Error('用户名已存在');
     user.username = username;
     user.password = password;
     return user.save();
@@ -33,10 +28,17 @@ class UserService extends Service {
       const user = await this.ctx.model.User.findOne({
         _id: userId
       });
-      return user.username
+      return user.username;
     } catch (err) {
-      throw new Error(err)
+      throw new Error(err);
     }
+  }
+
+  async findUserById(userId) {
+    const user = await this.ctx.model.User.findOne({
+      _id: userId
+    });
+    return user;
   }
 }
 

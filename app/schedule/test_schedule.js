@@ -30,7 +30,6 @@ module.exports = {
     productTypeDict.forEach(item => {
       dictObj[item.value] = item.label
     })
-
     const {
       orderList
     } = await ctx.service.order.getOrderList({

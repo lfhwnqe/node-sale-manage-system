@@ -40,7 +40,13 @@ module.exports = app => {
       saleBy: {
         type: String,
         require: true
+      },
+      // 订单所属组织Id
+      groupId: {
+        type: String,
+        require: true
       }
+
     });
     return mongoose.model('Order', OrderSchema);
   } catch (e) {
