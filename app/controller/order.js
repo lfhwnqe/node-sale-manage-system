@@ -13,14 +13,14 @@ class OrderController extends Controller {
       const userId = ctx.userinfo;
       const {
         groupId,
-        username
+        userLabel
       } = await ctx.service.user.findUserById(userId);
       const form = {
         userId,
         groupId,
-        saleBy: username
+        saleBy: userLabel
       };
-      const paramKeys = ['ordersList', 'remark', 'saleTime', 'phone', ];
+      const paramKeys = ['ordersList', 'remark', 'saleTime', 'phone',];
       paramKeys.forEach(item => {
         form[item] = params[item];
       });
@@ -64,12 +64,12 @@ class OrderController extends Controller {
   async getPhoneNumberList() {
     const {
       phoneNumber
-    } = this.ctx.request.query
-    const data = await this.ctx.service.order.getPhoneNumberList(phoneNumber)
+    } = this.ctx.request.query;
+    const data = await this.ctx.service.order.getPhoneNumberList(phoneNumber);
     this.ctx.body = {
       data,
       success: true
-    }
+    };
   }
 
 }

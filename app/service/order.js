@@ -7,19 +7,19 @@ class OrderService extends Service {
   async insertOrder(params) {
     try {
       if (!params.saleTime) {
-        params.saleTime = Date.parse(Date.now())
+        params.saleTime = Date.parse(Date.now());
       } else {
-        params.saleTime = Date.parse(new Date(params.saleTime))
+        params.saleTime = Date.parse(new Date(params.saleTime));
       }
-      let ordersTotalPrice = 0
+      let ordersTotalPrice = 0;
       params.ordersList.forEach(order => {
-        ordersTotalPrice += order.price
-      })
-      params.ordersTotalPrice = ordersTotalPrice
-      const insertOrderResult = await this.ctx.model.Order.create(params)
+        ordersTotalPrice += order.price;
+      });
+      params.ordersTotalPrice = ordersTotalPrice;
+      const insertOrderResult = await this.ctx.model.Order.create(params);
       return insertOrderResult;
     } catch (err) {
-      throw new Error(err)
+      throw new Error(err);
     }
   }
 
@@ -27,36 +27,59 @@ class OrderService extends Service {
     try {
       const {
         pageSize = 20, pageNum = 1
-      } = params
+      } = params;
       const queryForm = {};
-      ['productName', 'amount', 'totalPrice', 'tagPrice', 'saleTimeStart', 'userId'].forEach(key => {
+      let groupId;
+      const userRole = await this.ctx.service.user.getUserRoleById(params.userId);
+      if (userRole === 'superAdmin') {
+        const userInfo = await this.ctx.service.user.findUserById(params.userId)
+        groupId = userInfo.groupId
+      }
+      ['saleTimeStart', 'groupId'].forEach(key => {
         if (params['saleTimeStart']) {
           queryForm['saleTime'] = {
             // 这里需要加上new Date() mongodb才能解析日期
             '$gte': new Date(params['saleTimeStart'])
-          }
-        } else if (params[key]) {
-          queryForm[key] = params[key]
+          };
         }
-      })
+        /** userId进行筛选处理 **/
+        else if (key === 'groupId') {
+          if (userRole === 'superAdmin') {
+            queryForm[key] = groupId
+          }
+        }
+      });
 
-      const skip = (pageNum * 1 - 1) * pageSize
+      if (!queryForm.groupId) {
+        queryForm.userId = params.userId
+      }
+
+      const skip = (pageNum * 1 - 1) * pageSize;
       const orderList = await this.ctx.model.Order.find(queryForm).sort({
         saleTime: -1
       }).limit(pageSize * 1).skip(skip);
-      const totalPage = await this.ctx.model.Order.find({
-        userId: queryForm.userId
-      }).countDocuments() / pageSize
+      let totalQuery = {}
+      if (groupId) {
+        totalQuery = {
+          groupId
+        }
+      } else {
+        totalQuery = {
+          userId: queryForm.userId
+        }
+      }
+      const totalPage = await this.ctx.model.Order.find(totalQuery).countDocuments() / pageSize;
       return {
         orderList,
         pageNum,
         pageSize,
         totalPage: Math.floor(totalPage) + 1
-      }
+      };
     } catch (err) {
-      console.log('err:', err)
+      console.log('err:', err);
     }
   }
+
   // 根据传入的时间统计日期内订单总和
   async totalRevenueStatics(params) {
     try {
@@ -64,7 +87,13 @@ class OrderService extends Service {
         userId,
         startTime,
         endTime
-      } = params
+      } = params;
+      const userRole = await this.ctx.service.user.getUserRoleById(params.userId);
+      let groupId;
+      if (userRole === 'superAdmin') {
+        const userInfo = await this.ctx.service.user.findUserById(userId)
+        groupId = userInfo.groupId
+      }
       const queries = [{
           $match: {
             userId: userId ? userId : {
@@ -88,24 +117,28 @@ class OrderService extends Service {
             }
           }
         },
-      ]
-      const total = await this.ctx.model.Order.aggregate(queries)
+      ];
+      if (groupId) {
+        queries[0]['$match'].groupId = groupId
+        delete queries[0]['$match'].userId
+      }
+      const total = await this.ctx.model.Order.aggregate(queries);
 
       return total[0] || {
         _id: null,
         totalCount: 0,
         totalAmount: 0,
         saleNumber: 0
-      }
+      };
     } catch (err) {
-      console.log('error in mongodb:', err)
+      console.log('error in mongodb:', err);
     }
   }
 
   async getPhoneNumberList(phoneNumber) {
-    let query
+    let query;
     if (phoneNumber) {
-      const regex = new RegExp(`${phoneNumber}`)
+      const regex = new RegExp(`${phoneNumber}`);
       query = {
         $or: [{
           phone: {
@@ -113,14 +146,14 @@ class OrderService extends Service {
             $options: 'i'
           }
         }]
-      }
+      };
     }
     const projection = {
       phone: 1
-    }
+    };
     // 模糊查询返回10条数据
-    const phones = await this.ctx.model.Order.find(query).limit(10).distinct('phone')
-    return phones
+    const phones = await this.ctx.model.Order.find(query).limit(10).distinct('phone');
+    return phones;
   }
 }
 
