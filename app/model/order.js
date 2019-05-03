@@ -17,7 +17,7 @@ module.exports = app => {
       },
       // 买家电话
       phone: {
-        type: Number
+        type: String
       },
       // 出售时间
       saleTime: {

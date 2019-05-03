@@ -3,14 +3,24 @@
 const Service = require('egg').Controller;
 
 class GroupService extends Service {
-  async createGroup(groupName) {
-    const group = new this.ctx.model.Group();
-    const isGroupExist = await this.ctx.model.Group.findOne({
-      groupName,
-    });
-    if (isGroupExist) throw new Error('组织已存在');
-    group.groupName = groupName;
-    return group.save();
+  async createGroup(groupName, groupLabel) {
+    try {
+      const group = new this.ctx.model.Group();
+      const isGroupExist = await this.ctx.model.Group.findOne({
+        groupName,
+      });
+      if (isGroupExist) throw new Error('组织已存在');
+      group.groupName = groupName;
+      group.groupLabel = groupLabel
+      return group.save();
+
+    } catch (err) {
+      if (err.message.indexOf('E11000 duplicate key') !== -1) {
+        err = new Error('请勿添加重复的组织')
+        throw err
+      }
+      throw new Error(err)
+    }
   }
 
   /**
@@ -23,8 +33,11 @@ class GroupService extends Service {
     });
     if (!selectGroup) throw new Error('组织不存在');
     // 更新用户的组织
-    const result = await this.ctx.model.User.userModel.findeOneAndUpdate({ _id: userId },
-      { group: groupId });
+    const result = await this.ctx.model.User.userModel.findeOneAndUpdate({
+      _id: userId
+    }, {
+      group: groupId
+    });
     return result;
   }
 }

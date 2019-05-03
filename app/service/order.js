@@ -101,6 +101,27 @@ class OrderService extends Service {
       console.log('error in mongodb:', err)
     }
   }
+
+  async getPhoneNumberList(phoneNumber) {
+    let query
+    if (phoneNumber) {
+      const regex = new RegExp(`${phoneNumber}`)
+      query = {
+        $or: [{
+          phone: {
+            $regex: regex,
+            $options: 'i'
+          }
+        }]
+      }
+    }
+    const projection = {
+      phone: 1
+    }
+    // 模糊查询返回10条数据
+    const phones = await this.ctx.model.Order.find(query).limit(10).distinct('phone')
+    return phones
+  }
 }
 
 module.exports = OrderService;

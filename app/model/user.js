@@ -9,7 +9,7 @@ module.exports = app => {
         type: String,
         require: true,
         max: 32,
-        min: [0, '必须输入用户名'],
+        min: [0, '必须输入账号名'],
         unique: true
       },
       password: {
@@ -17,6 +17,11 @@ module.exports = app => {
         require: true,
         min: [0, '必须输入密码'],
         max: 32
+      },
+      userLabel: {
+        type: String,
+        require: true,
+        min: [0, '必须输入用户名'],
       },
       // 用户的角色
       role: {

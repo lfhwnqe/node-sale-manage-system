@@ -12,14 +12,29 @@ class UserService extends Service {
     return user.id;
   }
 
-  async createUser(username, password) {
+  async createUser({
+    username,
+    password,
+    userLabel,
+    role = 'baseUser',
+    groupId,
+    adminId
+  }) {
     const user = new this.ctx.model.User();
     const userIsExist = await this.ctx.model.User.findOne({
       username,
     });
     if (userIsExist) throw new Error('用户名已存在');
+    if (adminId) {
+      const user = await this.findUserById(adminId)
+      groupId = user.groupId
+    }
     user.username = username;
     user.password = password;
+    user.userLabel = userLabel;
+    user.role = role;
+    user.groupId = groupId;
+    console.log('user:', user)
     return user.save();
   }
 
@@ -39,6 +54,28 @@ class UserService extends Service {
       _id: userId
     });
     return user;
+  }
+
+  async findUserListByGroup(userId) {
+    const thisUser = await this.ctx.model.User.findOne({
+      _id: userId
+    })
+    if (thisUser.role !== 'superAdmin') throw new Error('没有权限')
+    const groupId = thisUser.groupId
+    const data = await this.ctx.model.User.find({
+      groupId
+    }, {
+      userLabel: 1,
+      username: 1
+    })
+    return data
+  }
+
+  async getSaleByList(userId) {
+    return [{
+      value: 'wsd',
+      label: '万盛店'
+    }]
   }
 }
 

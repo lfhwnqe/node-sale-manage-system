@@ -7,7 +7,16 @@ module.exports = app => {
     /** 组织表，用于记录组织信息 **/
     const GroupSchema = new Schema({
       // 组织名称
-      groupName: { type: String, require: true, unique: true },
+      groupName: {
+        type: String,
+        require: true,
+        unique: true
+      },
+      groupLabel: {
+        type: String,
+        require: true,
+        unique: true
+      }
     });
     return mongoose.model('Group', GroupSchema);
   } catch (e) {

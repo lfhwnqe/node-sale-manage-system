@@ -11,11 +11,16 @@ class OrderController extends Controller {
     try {
       const params = ctx.request.body;
       const userId = ctx.userinfo;
-      const { groupId,username } = await ctx.service.user.findUserById(userId);
+      const {
+        groupId,
+        username
+      } = await ctx.service.user.findUserById(userId);
       const form = {
-        userId, groupId,saleBy:username
+        userId,
+        groupId,
+        saleBy: username
       };
-      const paramKeys = ['ordersList', 'remark', 'saleTime', 'phone',];
+      const paramKeys = ['ordersList', 'remark', 'saleTime', 'phone', ];
       paramKeys.forEach(item => {
         form[item] = params[item];
       });
@@ -54,6 +59,17 @@ class OrderController extends Controller {
       data: result,
       success: true
     };
+  }
+
+  async getPhoneNumberList() {
+    const {
+      phoneNumber
+    } = this.ctx.request.query
+    const data = await this.ctx.service.order.getPhoneNumberList(phoneNumber)
+    this.ctx.body = {
+      data,
+      success: true
+    }
   }
 
 }
