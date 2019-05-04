@@ -29,24 +29,24 @@ class OrderService extends Service {
         pageSize = 20, pageNum = 1
       } = params;
       const queryForm = {};
-      let groupId;
       const userRole = await this.ctx.service.user.getUserRoleById(params.userId);
       if (userRole === 'superAdmin') {
         const userInfo = await this.ctx.service.user.findUserById(params.userId);
-        groupId = userInfo.groupId;
+        queryForm.groupId = userInfo.groupId;
+      } else { // 普通用户查询只传userId
+        queryForm.userId = params.userId
       }
-      ['saleTimeStart', 'groupId'].forEach(key => {
-        if (params['saleTimeStart']) {
+      ['fromTime', 'endTime'].forEach(key => {
+        if (key === 'fromTime' && params[key]) {
           queryForm['saleTime'] = {
             // 这里需要加上new Date() mongodb才能解析日期
-            '$gte': new Date(params['saleTimeStart'])
+            '$gte': new Date(params[key])
           };
-        }
-        /** userId进行筛选处理 **/
-        else if (key === 'groupId') {
-          if (userRole === 'superAdmin') {
-            queryForm[key] = groupId;
-          }
+        } else if (key === 'endTime' && params[key]) {
+          queryForm['saleTime'] = {
+            // 这里需要加上new Date() mongodb才能解析日期
+            '$lt': new Date(params[key])
+          };
         }
       });
 
@@ -58,6 +58,8 @@ class OrderService extends Service {
       const orderList = await this.ctx.model.Order.find(queryForm).sort({
         saleTime: -1
       }).limit(pageSize * 1).skip(skip);
+      const total = await this.ctx.model.Order.find(queryForm).countDocuments()
+      const totalPage = total / pageSize;
       /** 获取当前查询条件下订单数量，总收入统计 **/
       const revenueStaticsQuery = [{
           $match: queryForm
@@ -70,21 +72,14 @@ class OrderService extends Service {
             },
           }
         }
-      ]
-      const revenueStaticsResult = await this.ctx.model.Order.aggregate(revenueStaticsQuery)
-      const totalPrice = revenueStaticsResult[0].totalPrice
-      let totalQuery = {};
-      if (groupId) {
-        totalQuery = {
-          groupId
-        };
+      ];
+      const revenueStaticsResult = await this.ctx.model.Order.aggregate(revenueStaticsQuery);
+      let totalPrice;
+      if (revenueStaticsResult.length > 0) {
+        totalPrice = revenueStaticsResult[0].totalPrice;
       } else {
-        totalQuery = {
-          userId: queryForm.userId
-        };
+        totalPrice = 0;
       }
-      const total = await this.ctx.model.Order.find(totalQuery).countDocuments()
-      const totalPage = total / pageSize;
       return {
         orderList,
         pageNum,

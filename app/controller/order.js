@@ -49,10 +49,7 @@ class OrderController extends Controller {
       ctx
     } = this;
     const params = ctx.request.query;
-    const userId = ctx.cookies.get('userinfo', {
-      signed: false,
-      encrypt: true
-    });
+    const userId = ctx.userinfo;
     params.userId = userId;
     const result = await ctx.service.order.getOrderList(params);
     ctx.body = {
