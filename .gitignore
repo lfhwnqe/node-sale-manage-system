@@ -14,6 +14,7 @@ run/
 typings/
 .nyc_output/
 user_config.js
-/data_files/
+data_files/
 .vscode
 .idea
+*.xlsx
