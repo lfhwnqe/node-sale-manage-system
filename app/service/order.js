@@ -32,8 +32,8 @@ class OrderService extends Service {
       let groupId;
       const userRole = await this.ctx.service.user.getUserRoleById(params.userId);
       if (userRole === 'superAdmin') {
-        const userInfo = await this.ctx.service.user.findUserById(params.userId)
-        groupId = userInfo.groupId
+        const userInfo = await this.ctx.service.user.findUserById(params.userId);
+        groupId = userInfo.groupId;
       }
       ['saleTimeStart', 'groupId'].forEach(key => {
         if (params['saleTimeStart']) {
@@ -45,34 +45,52 @@ class OrderService extends Service {
         /** userId进行筛选处理 **/
         else if (key === 'groupId') {
           if (userRole === 'superAdmin') {
-            queryForm[key] = groupId
+            queryForm[key] = groupId;
           }
         }
       });
 
       if (!queryForm.groupId) {
-        queryForm.userId = params.userId
+        queryForm.userId = params.userId;
       }
 
       const skip = (pageNum * 1 - 1) * pageSize;
       const orderList = await this.ctx.model.Order.find(queryForm).sort({
         saleTime: -1
       }).limit(pageSize * 1).skip(skip);
-      let totalQuery = {}
+      /** 获取当前查询条件下订单数量，总收入统计 **/
+      const revenueStaticsQuery = [{
+          $match: queryForm
+        },
+        {
+          $group: {
+            '_id': null,
+            'totalPrice': {
+              '$sum': '$ordersTotalPrice'
+            },
+          }
+        }
+      ]
+      const revenueStaticsResult = await this.ctx.model.Order.aggregate(revenueStaticsQuery)
+      const totalPrice = revenueStaticsResult[0].totalPrice
+      let totalQuery = {};
       if (groupId) {
         totalQuery = {
           groupId
-        }
+        };
       } else {
         totalQuery = {
           userId: queryForm.userId
-        }
+        };
       }
-      const totalPage = await this.ctx.model.Order.find(totalQuery).countDocuments() / pageSize;
+      const total = await this.ctx.model.Order.find(totalQuery).countDocuments()
+      const totalPage = total / pageSize;
       return {
         orderList,
         pageNum,
         pageSize,
+        totalPrice,
+        total,
         totalPage: Math.floor(totalPage) + 1
       };
     } catch (err) {
@@ -91,8 +109,8 @@ class OrderService extends Service {
       const userRole = await this.ctx.service.user.getUserRoleById(params.userId);
       let groupId;
       if (userRole === 'superAdmin') {
-        const userInfo = await this.ctx.service.user.findUserById(userId)
-        groupId = userInfo.groupId
+        const userInfo = await this.ctx.service.user.findUserById(userId);
+        groupId = userInfo.groupId;
       }
       const queries = [{
           $match: {
@@ -119,8 +137,8 @@ class OrderService extends Service {
         },
       ];
       if (groupId) {
-        queries[0]['$match'].groupId = groupId
-        delete queries[0]['$match'].userId
+        queries[0]['$match'].groupId = groupId;
+        delete queries[0]['$match'].userId;
       }
       const total = await this.ctx.model.Order.aggregate(queries);
 

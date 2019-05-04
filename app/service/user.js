@@ -81,10 +81,8 @@ class UserService extends Service {
   }
 
   async getSaleByList(userId) {
-    return [{
-      value: 'wsd',
-      label: '万盛店'
-    }];
+    const userList = await this.ctx.service.user.findUserListByGroup(userId);
+    return userList;
   }
 }
 
