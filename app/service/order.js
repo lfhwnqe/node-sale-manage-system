@@ -23,18 +23,33 @@ class OrderService extends Service {
     }
   }
 
+  async removeOrderById(orderId, userId) {
+    if (!orderId) throw new Error('参数错误');
+    // 确定该订单在提交删除用户的组织内
+    const userData = await this.ctx.service.user.findUserById(userId);
+    const orderData = await this.getOrderDetailByOrderId(orderId);
+    if (!orderData) throw new Error('没有该订单');
+    if (userData.role !== 'superAdmin' || userData.groupId !== orderData.groupId) throw new Error('没有权限');
+    const data = await this.ctx.model.Order.remove({
+      _id: orderId
+    });
+    return data;
+  }
+
   async getOrderList(params) {
     try {
       const {
         pageSize = 20, pageNum = 1
       } = params;
       const queryForm = {};
+      let canDeleteOrder = false;
       const userRole = await this.ctx.service.user.getUserRoleById(params.userId);
       if (userRole === 'superAdmin') {
         const userInfo = await this.ctx.service.user.findUserById(params.userId);
         queryForm.groupId = userInfo.groupId;
+        canDeleteOrder = true;
       } else { // 普通用户查询只传userId
-        queryForm.userId = params.userId
+        queryForm.userId = params.userId;
       }
       ['fromTime', 'endTime'].forEach(key => {
         if (key === 'fromTime' && params[key]) {
@@ -49,6 +64,13 @@ class OrderService extends Service {
           };
         }
       });
+      if (params.saleBy) {
+        queryForm.userId = params.saleBy;
+      }
+
+      if (params.phoneNumber) {
+        queryForm.phone = params.phoneNumber;
+      }
 
       if (!queryForm.groupId) {
         queryForm.userId = params.userId;
@@ -58,12 +80,12 @@ class OrderService extends Service {
       const orderList = await this.ctx.model.Order.find(queryForm).sort({
         saleTime: -1
       }).limit(pageSize * 1).skip(skip);
-      const total = await this.ctx.model.Order.find(queryForm).countDocuments()
+      const total = await this.ctx.model.Order.find(queryForm).countDocuments();
       const totalPage = total / pageSize;
       /** 获取当前查询条件下订单数量，总收入统计 **/
       const revenueStaticsQuery = [{
-          $match: queryForm
-        },
+        $match: queryForm
+      },
         {
           $group: {
             '_id': null,
@@ -81,6 +103,7 @@ class OrderService extends Service {
         totalPrice = 0;
       }
       return {
+        canDeleteOrder,
         orderList,
         pageNum,
         pageSize,
@@ -108,17 +131,17 @@ class OrderService extends Service {
         groupId = userInfo.groupId;
       }
       const queries = [{
-          $match: {
-            userId: userId ? userId : {
-              '$exists': true
-            },
-            'saleTime': {
-              // 这里需要加上new Date() mongodb才能解析日期
-              '$gte': new Date(startTime),
-              '$lt': endTime ? new Date(endTime) : new Date()
-            }
+        $match: {
+          userId: userId ? userId : {
+            '$exists': true
+          },
+          'saleTime': {
+            // 这里需要加上new Date() mongodb才能解析日期
+            '$gte': new Date(startTime),
+            '$lt': endTime ? new Date(endTime) : new Date()
           }
-        },
+        }
+      },
         {
           $group: {
             '_id': null,
@@ -146,6 +169,11 @@ class OrderService extends Service {
     } catch (err) {
       console.log('error in mongodb:', err);
     }
+  }
+
+  async getOrderDetailByOrderId(orderId) {
+    const result = await this.ctx.model.Order.findOne({ _id: orderId });
+    return result;
   }
 
   async getPhoneNumberList(phoneNumber) {

@@ -20,6 +20,7 @@ module.exports = app => {
   router.get('/api/getUserList', auth, controller.user.findUserListByGroup)
   // router.get('/api/getUserList', controller.user.showUsers)
   router.post('/api/insertOrder', auth, controller.order.insertOrder);
+  router.post('/api/removeOrderById',auth,controller.order.removeOrderById)
   router.get('/api/getOrderList', auth, controller.order.getOrderList);
   router.get('/api/getPhoneNumberList', auth, controller.order.getPhoneNumberList)
   // 获取销售员列表

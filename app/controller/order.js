@@ -69,6 +69,16 @@ class OrderController extends Controller {
     };
   }
 
+  async removeOrderById() {
+    const { orderId } = this.ctx.request.body;
+    const userId = this.ctx.userinfo;
+    const data = await this.ctx.service.order.removeOrderById(orderId, userId);
+    this.ctx.body = {
+      data,
+      success: true
+    };
+  }
+
 }
 
 module.exports = OrderController;
