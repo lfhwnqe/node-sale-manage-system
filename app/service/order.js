@@ -1,4 +1,5 @@
 'use strict';
+const moment = require('moment');
 
 const Service = require('egg').Controller;
 
@@ -55,12 +56,12 @@ class OrderService extends Service {
         if (key === 'fromTime' && params[key]) {
           queryForm['saleTime'] = {
             // 这里需要加上new Date() mongodb才能解析日期
-            '$gte': new Date(params[key])
+            '$gte': moment(params[key]).add(8, 'hours')
           };
         } else if (key === 'endTime' && params[key]) {
           queryForm['saleTime'] = {
             // 这里需要加上new Date() mongodb才能解析日期
-            '$lt': new Date(params[key])
+            '$lt': moment(params[key]).add(8, 'hours')
           };
         }
       });
@@ -138,7 +139,7 @@ class OrderService extends Service {
           'saleTime': {
             // 这里需要加上new Date() mongodb才能解析日期
             '$gte': new Date(startTime),
-            '$lt': endTime ? new Date(endTime) : new Date()
+            // '$lt': endTime ? new Date(endTime) : new Date()
           }
         }
       },

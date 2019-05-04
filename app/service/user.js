@@ -49,10 +49,10 @@ class UserService extends Service {
     }
   }
 
-  async findUserById(userId) {
+  async findUserById(userId, projection) {
     const user = await this.ctx.model.User.findOne({
       _id: userId
-    });
+    }, projection);
     return user;
   }
 

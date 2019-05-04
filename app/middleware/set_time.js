@@ -19,7 +19,7 @@ module.exports = (option) => {
         if (queries[key]) {
           queries[key] = moment(queries[key]).add(8, 'hours')
         } else {
-          params[key] = moment(queries[key]).add(8, 'hours')
+          params[key] = moment(params[key]).add(8, 'hours')
         }
       }
     })
