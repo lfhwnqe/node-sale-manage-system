@@ -11,16 +11,13 @@ class ProductService extends Service {
     const product = new ctx.model.Product();
     product.label = params.label
     product.value = params.value
-    product.countValue = params.countValue
+    product.productTypeId = params.productTypeId
     const result = await product.save()
     return result
   }
 
   async getProductTypeList(params) {
-    const {
-      ctx
-    } = this
-    const result = await this.ctx.model.Product.find()
+    const result = await this.ctx.model.Product.find(params)
     return result
   }
 

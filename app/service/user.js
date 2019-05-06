@@ -13,13 +13,13 @@ class UserService extends Service {
   }
 
   async createUser({
-                     username,
-                     password,
-                     userLabel,
-                     role = 'baseUser',
-                     groupId,
-                     adminId
-                   }) {
+    username,
+    password,
+    userLabel,
+    role = 'baseUser',
+    groupId,
+    adminId
+  }) {
     const user = new this.ctx.model.User();
     const userIsExist = await this.ctx.model.User.findOne({
       username,
@@ -34,7 +34,6 @@ class UserService extends Service {
     user.userLabel = userLabel;
     user.role = role;
     user.groupId = groupId;
-    console.log('user:', user);
     return user.save();
   }
 

@@ -2,15 +2,15 @@
 const Controller = require('egg').Controller;
 
 class ProductController extends Controller {
-  async insertProductType() {
+  async insert() {
     const {
       ctx
     } = this;
     try {
 
       const params = ctx.request.body
-      ctx.helper.validateByModelDict(params, 'productDict')
-      const data = await ctx.service.product.insertProductType(params)
+      const form = ctx.helper.validateByModelDict(params, 'productDict')
+      const data = await ctx.service.product.insertProductType(form)
       ctx.body = {
         data,
         success: true
@@ -24,7 +24,7 @@ class ProductController extends Controller {
     }
   }
 
-  async getProductTypeList() {
+  async getList() {
     const {
       ctx
     } = this;
@@ -40,7 +40,7 @@ class ProductController extends Controller {
     }
   }
 
-  async removeProductTypeList() {
+  async remove() {
     const {
       ctx
     } = this;

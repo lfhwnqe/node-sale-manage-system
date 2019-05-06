@@ -20,17 +20,23 @@ module.exports = app => {
   router.get('/api/getUserList', auth, controller.user.findUserListByGroup)
   // router.get('/api/getUserList', controller.user.showUsers)
   router.post('/api/insertOrder', auth, controller.order.insertOrder);
-  router.post('/api/removeOrderById',auth,controller.order.removeOrderById)
+  router.post('/api/removeOrderById', auth, controller.order.removeOrderById)
   router.get('/api/getOrderList', auth, controller.order.getOrderList);
   router.get('/api/getPhoneNumberList', auth, controller.order.getPhoneNumberList)
   // 获取销售员列表
   router.get('/api/getSaleByList', auth, controller.user.getSaleByList)
 
-  router.post('/api/insertProductType', auth, controller.product.insertProductType);
+  // 产品大类相关
+  router.post('/api/insertProductType', auth, controller.productType.insert);
+  router.post('/api/getProductTypeList', auth, controller.productType.getList);
+  router.post('/api/removeProductType', auth, controller.productType.removeById);
 
-  router.post('/api/getProductTypeList', auth, controller.product.getProductTypeList);
+  // 产品相关
+  router.post('/api/insertProduct', auth, controller.product.insert);
+  router.post('/api/getProductList', auth, controller.product.getList);
+  router.post('/api/removeProduct', auth, controller.product.remove);
 
-  router.post('/api/removeProductTypeList', auth, controller.product.removeProductTypeList);
+  // 用户组织相关
   router.post('/api/setUserGroup', auth, controller.group.setUserGroup);
   router.post('/api/createGroup', auth, controller.group.createGroup);
 };

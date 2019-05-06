@@ -1,5 +1,35 @@
 'use strict';
 const modelDict = {
+  // 产品大类
+  productTypeDict: {
+    schema: {
+      label: {
+        require: true,
+        type: String,
+        unique: true,
+        label: '产品品类'
+      },
+      value: {
+        require: true,
+        type: String,
+        unique: true,
+        label: '产品品类值'
+      },
+      countLabel: {
+        require: true,
+        type: String,
+        unique: true,
+        label: '品类单位'
+      },
+      countValue: {
+        require: true,
+        type: String,
+        unique: true,
+        label: '品类单位值'
+      },
+    }
+  },
+  // 产品小类，属于产品大类型
   productDict: {
     schema: {
       label: {
@@ -14,31 +44,14 @@ const modelDict = {
         unique: true,
         label: '产品名称值'
       },
-      countValue: {
+      // 这里是产品大类的id
+      productTypeId: {
         require: true,
         type: String,
-        label: '计量单位'
+        label: '产品所属大类'
       }
     }
   },
-
-
-  estimateDict: {
-    schema: {
-      label: {
-        require: true,
-        type: String,
-        unique: true,
-        label: '计量单位'
-      },
-      value: {
-        require: true,
-        type: String,
-        unique: true,
-        label: '计量单位值'
-      },
-    },
-  }
 }
 
 Object.keys(modelDict).forEach(key => {
@@ -47,7 +60,8 @@ Object.keys(modelDict).forEach(key => {
     const currentItem = currentModel.schema[item]
     const ret = {
       label: currentItem.label,
-      value: item
+      value: item,
+      require: currentItem.require
     }
     return ret
   })
