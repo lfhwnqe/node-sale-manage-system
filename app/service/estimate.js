@@ -1,14 +1,20 @@
 'use strict';
+const {
+  estimate
+} = require('../../config/model_dict')
 
 const Service = require('egg').Controller;
 
-class ProductService extends Service {
+class EstimateService extends Service {
 
-  async insertProductType(params) {
+  async insert(params) {
     const {
       ctx
     } = this
+    // try {
     const product = new ctx.model.Product();
+    const paramArray = estimate.params
+
     product.label = params.label
     product.value = params.value
     product.countValue = params.countValue
@@ -16,7 +22,7 @@ class ProductService extends Service {
     return result
   }
 
-  async getProductTypeList(params) {
+  async getList(params) {
     const {
       ctx
     } = this
@@ -24,7 +30,7 @@ class ProductService extends Service {
     return result
   }
 
-  async removeProductTypeList(id) {
+  async removeById(id) {
     const result = await this.ctx.model.Product.deleteOne({
       _id: id
     });
@@ -32,4 +38,4 @@ class ProductService extends Service {
   }
 }
 
-module.exports = ProductService;
+module.exports = EstimateService;

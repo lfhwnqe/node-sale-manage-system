@@ -17,6 +17,9 @@ module.exports = (option, app) => {
       //   ? 'Internal Server Error'
       //   : err.message;
       // 从 error 对象上读出各个属性，设置到响应中
+      if (err.message && err.message.indexOf('Error:') > -1) {
+        err.message = err.message.split('Error:')[1]
+      }
       const msg = err.message
       ctx.body = {
         msg
