@@ -6,26 +6,26 @@ const modelDict = {
       label: {
         require: true,
         type: String,
-        unique: true,
         label: '产品品类'
       },
       value: {
         require: true,
         type: String,
-        unique: true,
         label: '产品品类值'
       },
       countLabel: {
         require: true,
         type: String,
-        unique: true,
         label: '品类单位'
       },
       countValue: {
         require: true,
         type: String,
-        unique: true,
         label: '品类单位值'
+      },
+      groupId: {
+        type: String,
+        label: '所属组织'
       },
     }
   },
@@ -49,7 +49,11 @@ const modelDict = {
         require: true,
         type: String,
         label: '产品所属大类'
-      }
+      },
+      groupId: {
+        type: String,
+        label: '所属组织'
+      },
     }
   },
 }

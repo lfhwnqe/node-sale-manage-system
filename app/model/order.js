@@ -8,7 +8,8 @@ module.exports = app => {
       ordersList: [{
         number: Number,
         price: Number,
-        productType: String
+        productType: String,
+        product: String
       }],
       // 该订单总金额
       ordersTotalPrice: {

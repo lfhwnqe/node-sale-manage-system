@@ -83,6 +83,14 @@ class UserService extends Service {
     const userList = await this.ctx.service.user.findUserListByGroup(userId);
     return userList;
   }
+
+  async getUserGroupId(userId) {
+    const userData = await this.ctx.model.User.findOne({
+      _id: userId
+    })
+    const result = userData.groupId
+    return result;
+  }
 }
 
 module.exports = UserService;
