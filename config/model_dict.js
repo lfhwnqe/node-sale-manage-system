@@ -1,5 +1,77 @@
 'use strict';
 const modelDict = {
+  orderDict: {
+    schema: {
+      ordersList: [{
+        productType: String,
+        product: String,
+        number: Number,
+        price: Number
+      }],
+      // 买家电话
+      phone: {
+        type: String
+      },
+      // 出售时间
+      saleTime: {
+        require: true,
+        type: Date,
+        // default: Date.now,
+      },
+      // 备注
+      remark: {
+        type: String,
+        max: 320,
+      },
+      createTime: {
+        type: Date,
+        default: Date.now,
+      },
+      userId: {
+        type: String,
+        require: true
+      },
+      saleBy: {
+        type: String,
+        require: true
+      },
+      // 订单所属组织Id
+      groupId: {
+        type: String,
+        require: true
+      }
+    }
+  },
+  littleOrderDict: {
+    schema: {
+      // 这个id关联到大订单
+      orderId: {
+        label: '所属订单ID',
+        type: String,
+        ref: 'Order'
+      },
+      productType: {
+        label: '产品名称',
+        type: String,
+        require: true
+      },
+      product: {
+        label: '产品',
+        type: String,
+        require: true
+      },
+      number: {
+        label: '数量',
+        type: Number,
+        require: true
+      },
+      price: {
+        label: '价格',
+        type: Number,
+        require: true
+      }
+    }
+  },
   // 产品大类
   productTypeDict: {
     schema: {
@@ -56,20 +128,20 @@ const modelDict = {
       },
     }
   },
-}
+};
 
 Object.keys(modelDict).forEach(key => {
-  const currentModel = modelDict[key]
+  const currentModel = modelDict[key];
   const params = Object.keys(currentModel.schema).map(item => {
-    const currentItem = currentModel.schema[item]
+    const currentItem = currentModel.schema[item];
     const ret = {
       label: currentItem.label,
       value: item,
       require: currentItem.require
-    }
-    return ret
-  })
-  currentModel.params = params
-})
+    };
+    return ret;
+  });
+  currentModel.params = params;
+});
 
-module.exports = modelDict
+module.exports = modelDict;

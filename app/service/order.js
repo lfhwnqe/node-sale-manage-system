@@ -6,19 +6,40 @@ const Service = require('egg').Controller;
 class OrderService extends Service {
 
   async insertOrder(params) {
+    const { ctx } = this;
     try {
       if (!params.saleTime) {
         params.saleTime = Date.parse(Date.now());
       } else {
         params.saleTime = Date.parse(new Date(params.saleTime));
       }
-      let ordersTotalPrice = 0;
-      params.ordersList.forEach(order => {
-        ordersTotalPrice += order.price;
-      });
-      params.ordersTotalPrice = ordersTotalPrice;
-      const insertOrderResult = await this.ctx.model.Order.create(params);
-      return insertOrderResult;
+      const userId = ctx.userinfo;
+      const {
+        groupId,
+        userLabel
+      } = await ctx.service.user.findUserById(userId);
+      const saleBy = userLabel;
+      params.userId = userId;
+      params.groupId = groupId;
+      params.saleBy = saleBy;
+
+      const insertOrderResult = await ctx.model.Order.create(params);
+      const orderId = insertOrderResult.id;
+
+      // if (params.ordersList) {
+      //   // 依次生成子订单
+      //   await Promise.all(params.ordersList.map(item => {
+      //     const littleOrder = new ctx.model.LittleOrder();
+      //     littleOrder.productType = item.productType;
+      //     littleOrder.product = item.product;
+      //     littleOrder.number = item.number;
+      //     littleOrder.price = item.price;
+      //     littleOrder.orderId = orderId;
+      //     return littleOrder.save();
+      //   }));
+      // }
+
+      return orderId;
     } catch (err) {
       throw new Error(err);
     }
@@ -37,20 +58,29 @@ class OrderService extends Service {
     return data;
   }
 
+  // async getOrderList(params) {
+  //   const { ctx } = this;
+  //   const result = await ctx.model.LittleOrder.find({}).populate('orderId');
+  //   // console.log()
+  //   return result;
+  // }
+
   async getOrderList(params) {
+    const { ctx } = this;
     try {
+      const userId = ctx.userinfo;
       const {
         pageSize = 20, pageNum = 1
       } = params;
       const queryForm = {};
       let canDeleteOrder = false;
-      const userRole = await this.ctx.service.user.getUserRoleById(params.userId);
+      const userRole = await this.ctx.service.user.getUserRoleById(userId);
       if (userRole === 'superAdmin') {
-        const userInfo = await this.ctx.service.user.findUserById(params.userId);
+        const userInfo = await this.ctx.service.user.findUserById(userId);
         queryForm.groupId = userInfo.groupId;
         canDeleteOrder = true;
       } else { // 普通用户查询只传userId
-        queryForm.userId = params.userId;
+        queryForm.userId = userId;
       }
       ['fromTime', 'endTime'].forEach(key => {
         if (key === 'fromTime' && params[key]) {
@@ -74,7 +104,7 @@ class OrderService extends Service {
       }
 
       if (!queryForm.groupId) {
-        queryForm.userId = params.userId;
+        queryForm.userId = userId;
       }
 
       const skip = (pageNum * 1 - 1) * pageSize;
