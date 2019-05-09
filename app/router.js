@@ -22,6 +22,9 @@ module.exports = app => {
   router.post('/api/insertOrder', auth, controller.order.insertOrder);
   router.post('/api/removeOrderById', auth, controller.order.removeOrderById)
   router.get('/api/getOrderList', auth, controller.order.getOrderList);
+  router.get('/api/order/getOrderDetail', auth, controller.order.getOrderDetail);
+  
+
   router.get('/api/getPhoneNumberList', auth, controller.order.getPhoneNumberList)
   // 获取销售员列表
   router.get('/api/getSaleByList', auth, controller.user.getSaleByList)

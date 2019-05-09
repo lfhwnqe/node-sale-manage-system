@@ -14,6 +14,8 @@ class LittleOrderService extends Service {
     const {
       ctx
     } = this
+    const result = await ctx.model.LittleOrder.find(params)
+    return result
   }
 
   async removeById(id) {

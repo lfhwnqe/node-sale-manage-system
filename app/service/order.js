@@ -6,7 +6,9 @@ const Service = require('egg').Controller;
 class OrderService extends Service {
 
   async insertOrder(params) {
-    const { ctx } = this;
+    const {
+      ctx
+    } = this;
     try {
       if (!params.saleTime) {
         params.saleTime = Date.parse(Date.now());
@@ -22,22 +24,29 @@ class OrderService extends Service {
       params.userId = userId;
       params.groupId = groupId;
       params.saleBy = saleBy;
+      if (params.ordersList) {
+        let ordersTotalPrice = 0
+        params.ordersList.forEach(item => {
+          ordersTotalPrice += item.price
+        })
+        params.ordersTotalPrice = ordersTotalPrice
+      }
 
       const insertOrderResult = await ctx.model.Order.create(params);
       const orderId = insertOrderResult.id;
 
-      // if (params.ordersList) {
-      //   // 依次生成子订单
-      //   await Promise.all(params.ordersList.map(item => {
-      //     const littleOrder = new ctx.model.LittleOrder();
-      //     littleOrder.productType = item.productType;
-      //     littleOrder.product = item.product;
-      //     littleOrder.number = item.number;
-      //     littleOrder.price = item.price;
-      //     littleOrder.orderId = orderId;
-      //     return littleOrder.save();
-      //   }));
-      // }
+      if (params.ordersList) {
+        // 依次生成子订单
+        await Promise.all(params.ordersList.map(item => {
+          const littleOrder = new ctx.model.LittleOrder();
+          littleOrder.productType = item.productType;
+          littleOrder.product = item.product;
+          littleOrder.number = item.number;
+          littleOrder.price = item.price;
+          littleOrder.orderId = orderId;
+          return littleOrder.save();
+        }));
+      }
 
       return orderId;
     } catch (err) {
@@ -66,7 +75,9 @@ class OrderService extends Service {
   // }
 
   async getOrderList(params) {
-    const { ctx } = this;
+    const {
+      ctx
+    } = this;
     try {
       const userId = ctx.userinfo;
       const {
@@ -98,25 +109,40 @@ class OrderService extends Service {
       if (params.saleBy) {
         queryForm.userId = params.saleBy;
       }
-
       if (params.phoneNumber) {
         queryForm.phone = params.phoneNumber;
       }
-
       if (!queryForm.groupId) {
         queryForm.userId = userId;
       }
 
+      // if (params.productType) {
+      //   queryForm['ordersList.productType'] = params.productType
+      // }
+
+
       const skip = (pageNum * 1 - 1) * pageSize;
       const orderList = await this.ctx.model.Order.find(queryForm).sort({
         saleTime: -1
-      }).limit(pageSize * 1).skip(skip);
+      }).limit(pageSize * 1).skip(skip)
+
+      // const orderList = await Promise.all(orders.map(async order => {
+      //   const fn = async () => {
+      //     const list = await ctx.service.littleOrder.getList({
+      //       orderId: order.id
+      //     }, 'productType product number price')
+      //     order.ordersList = list
+      //     return order
+      //   }
+      //   return fn()
+      // }))
+
       const total = await this.ctx.model.Order.find(queryForm).countDocuments();
       const totalPage = total / pageSize;
       /** 获取当前查询条件下订单数量，总收入统计 **/
       const revenueStaticsQuery = [{
-        $match: queryForm
-      },
+          $match: queryForm
+        },
         {
           $group: {
             '_id': null,
@@ -162,17 +188,17 @@ class OrderService extends Service {
         groupId = userInfo.groupId;
       }
       const queries = [{
-        $match: {
-          userId: userId ? userId : {
-            '$exists': true
-          },
-          'saleTime': {
-            // 这里需要加上new Date() mongodb才能解析日期
-            '$gte': new Date(startTime),
-            // '$lt': endTime ? new Date(endTime) : new Date()
+          $match: {
+            userId: userId ? userId : {
+              '$exists': true
+            },
+            'saleTime': {
+              // 这里需要加上new Date() mongodb才能解析日期
+              '$gte': new Date(startTime),
+              // '$lt': endTime ? new Date(endTime) : new Date()
+            }
           }
-        }
-      },
+        },
         {
           $group: {
             '_id': null,
@@ -203,7 +229,9 @@ class OrderService extends Service {
   }
 
   async getOrderDetailByOrderId(orderId) {
-    const result = await this.ctx.model.Order.findOne({ _id: orderId });
+    const result = await this.ctx.model.Order.findOne({
+      _id: orderId
+    });
     return result;
   }
 

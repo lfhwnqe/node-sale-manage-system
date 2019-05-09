@@ -2,15 +2,19 @@
 const modelDict = {
   orderDict: {
     schema: {
-      ordersList: [{
-        productType: String,
-        product: String,
-        number: Number,
-        price: Number
-      }],
+      // ordersList: [{
+      //   productType: String,
+      //   product: String,
+      //   number: Number,
+      //   price: Number
+      // }],
       // 买家电话
       phone: {
         type: String
+      },
+      ordersTotalPrice: {
+        type: Number,
+        require: true
       },
       // 出售时间
       saleTime: {
