@@ -22,7 +22,7 @@ module.exports = appInfo => {
   // add your middleware config here
 
   // add your config here
-  config.middleware = ['errorHandler'];
+  config.middleware = ['errorHandler', 'formatTime'];
   // config.middleware = [];
 
   // add your user config here

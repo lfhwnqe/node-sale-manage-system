@@ -11,6 +11,7 @@ module.exports = app => {
   } = app;
 
   const auth = middleware.auth();
+  const setTime = middleware.setTime()
 
   router.get('/api/createAdminUser', controller.user.createAdminUser)
   // 管理员创建用户
@@ -21,9 +22,12 @@ module.exports = app => {
   // router.get('/api/getUserList', controller.user.showUsers)
   router.post('/api/insertOrder', auth, controller.order.insertOrder);
   router.post('/api/removeOrderById', auth, controller.order.removeOrderById)
-  router.get('/api/getOrderList', auth, controller.order.getOrderList);
+  router.get('/api/getOrderList', auth, setTime, controller.order.getOrderList);
   router.get('/api/order/getOrderDetail', auth, controller.order.getOrderDetail);
-  
+  // 产品统计
+  router.get('/api/littleOrder/getStatics', auth, setTime, controller.littleOrder.getStatics);
+
+
 
   router.get('/api/getPhoneNumberList', auth, controller.order.getPhoneNumberList)
   // 获取销售员列表

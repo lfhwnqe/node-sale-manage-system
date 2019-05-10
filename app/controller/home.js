@@ -20,36 +20,32 @@ class HomeController extends Controller {
     const {
       ctx
     } = this
-    const baseParams = {
-      userId: ctx.userinfo,
-      endTime: moment(new Date()).format(),
-    }
-    const near30DaysParams = {
-      ...baseParams,
-      startTime: moment(new Date()).add(-30, 'days').format()
-    }
+    // const baseParams = {
+    //   userId: ctx.userinfo,
+    //   endTime: moment(new Date()).format(),
+    // }
+    // const near30DaysParams = {
+    //   ...baseParams,
+    //   startTime: moment(new Date()).add(-30, 'days').format()
+    // }
 
-    const near7DaysParams = {
-      ...baseParams,
-      startTime: moment(new Date()).add(-7, 'days').format()
-    }
+    // const near7DaysParams = {
+    //   ...baseParams,
+    //   startTime: moment(new Date()).add(-7, 'days').format()
+    // }
 
-    const todayParams = {
-      ...baseParams,
-      startTime: moment().startOf('day').format()
-    }
+    // const todayParams = {
+    //   ...baseParams,
+    //   startTime: moment().startOf('day').format()
+    // }
 
-    const near30DaysStatics = await ctx.service.order.totalRevenueStatics(near30DaysParams)
-    const near7DaysStatics = await ctx.service.order.totalRevenueStatics(near7DaysParams)
-    const todayStatics = await ctx.service.order.totalRevenueStatics(todayParams)
+    // const near30DaysStatics = await ctx.service.order.totalRevenueStatics(near30DaysParams)
+    // const near7DaysStatics = await ctx.service.order.totalRevenueStatics(near7DaysParams)
+    const data = await ctx.service.order.totalRevenueStatics()
 
     ctx.body = {
       success: true,
-      data: {
-        near30DaysStatics,
-        near7DaysStatics,
-        todayStatics
-      }
+      data
     }
   }
 }

@@ -15,11 +15,20 @@ module.exports = (option) => {
     })
     keys.forEach(key => {
       const keyStr = key.toLowerCase()
-      if (keyStr.indexOf('date') > -1 || keyStr.indexOf('time') > -1) {
+      // 特有时间查询字段进行格式处理 fromTime去当天0点，endTime取当天23:59分
+      if (keyStr.indexOf('fromtime') > -1) {
         if (queries[key]) {
-          queries[key] = moment(queries[key]).add(8, 'hours')
-        } else {
-          params[key] = moment(params[key]).add(8, 'hours')
+          // const startDate = moment(queries[key]).utc().format()
+          const startDate = moment(queries[key]).format()
+          const timer = moment(startDate).startOf('day').format()
+          queries[key] = timer
+        }
+      } else if (keyStr.indexOf('endtime') > -1) {
+        if (queries[key]) {
+          const endDate = moment(queries[key]).format()
+          // const endDate = moment(queries[key]).utc().format()
+          const timer = moment(endDate).endOf('day').format()
+          queries[key] = timer
         }
       }
     })

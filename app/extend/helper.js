@@ -1,3 +1,4 @@
+const moment = require('moment')
 const modelDict = require('../../config/model_dict')
 
 module.exports = {
@@ -20,4 +21,8 @@ module.exports = {
     // this 就是 app 对象，在其中可以调用 app 上的其他方法，或访问属性
     return ret
   },
+  // 把mongo时间加8小时
+  setLocalTimeToUtc(value) {
+    return moment(value).add(8, 'hours')
+  }
 };

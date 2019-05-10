@@ -44,6 +44,8 @@ class OrderService extends Service {
           littleOrder.number = item.number;
           littleOrder.price = item.price;
           littleOrder.orderId = orderId;
+          littleOrder.saleTime = params.saleTime
+          littleOrder.groupId = groupId;
           return littleOrder.save();
         }));
       }
@@ -67,13 +69,6 @@ class OrderService extends Service {
     return data;
   }
 
-  // async getOrderList(params) {
-  //   const { ctx } = this;
-  //   const result = await ctx.model.LittleOrder.find({}).populate('orderId');
-  //   // console.log()
-  //   return result;
-  // }
-
   async getOrderList(params) {
     const {
       ctx
@@ -93,19 +88,31 @@ class OrderService extends Service {
       } else { // 普通用户查询只传userId
         queryForm.userId = userId;
       }
-      ['fromTime', 'endTime'].forEach(key => {
-        if (key === 'fromTime' && params[key]) {
+
+      // 处理起始时间
+      if (params['fromTime']) {
+        queryForm['saleTime'] = {
+          // 这里需要加上new Date() mongodb才能解析日期
+          // '$gte': params['fromTime']
+          '$gte': new Date(params['fromTime'])
+          // '$gte': moment(params[key]).add(8, 'hours')
+        };
+      }
+
+      if (params['endTime']) {
+        if (!queryForm['saleTime']) {
           queryForm['saleTime'] = {
             // 这里需要加上new Date() mongodb才能解析日期
-            '$gte': moment(params[key]).add(8, 'hours')
+            // '$lt': params['endTime']
+            '$lt': new Date(params['endTime'])
+            // '$lt': moment(params[key]).add(8, 'hours')
           };
-        } else if (key === 'endTime' && params[key]) {
-          queryForm['saleTime'] = {
-            // 这里需要加上new Date() mongodb才能解析日期
-            '$lt': moment(params[key]).add(8, 'hours')
-          };
+        } else {
+          queryForm['saleTime']['$lt'] = new Date(params['endTime'])
+          // queryForm['saleTime']['$lt'] = params['endTime']
         }
-      });
+      }
+
       if (params.saleBy) {
         queryForm.userId = params.saleBy;
       }
@@ -116,26 +123,10 @@ class OrderService extends Service {
         queryForm.userId = userId;
       }
 
-      // if (params.productType) {
-      //   queryForm['ordersList.productType'] = params.productType
-      // }
-
-
       const skip = (pageNum * 1 - 1) * pageSize;
       const orderList = await this.ctx.model.Order.find(queryForm).sort({
         saleTime: -1
       }).limit(pageSize * 1).skip(skip)
-
-      // const orderList = await Promise.all(orders.map(async order => {
-      //   const fn = async () => {
-      //     const list = await ctx.service.littleOrder.getList({
-      //       orderId: order.id
-      //     }, 'productType product number price')
-      //     order.ordersList = list
-      //     return order
-      //   }
-      //   return fn()
-      // }))
 
       const total = await this.ctx.model.Order.find(queryForm).countDocuments();
       const totalPage = total / pageSize;
@@ -175,57 +166,125 @@ class OrderService extends Service {
 
   // 根据传入的时间统计日期内订单总和
   async totalRevenueStatics(params) {
-    try {
-      const {
-        userId,
-        startTime,
+    const {
+      ctx
+    } = this
+    const time = moment().utc().format()
+    const monthStartDate = moment(time).startOf('month').format()
+    const date = moment().date()
+    let days = new Array(date).fill({})
+    // let days = new Array(1).fill({})
+    days = days.map((item, index) => {
+      const date = moment(monthStartDate).add(index, 'days').format()
+      const fromTime = moment(date).startOf('day').format()
+      const endTime = moment(date).endOf('day').format()
+      return {
+        date,
+        fromTime,
         endTime
-      } = params;
-      const userRole = await this.ctx.service.user.getUserRoleById(params.userId);
-      let groupId;
-      if (userRole === 'superAdmin') {
-        const userInfo = await this.ctx.service.user.findUserById(userId);
-        groupId = userInfo.groupId;
       }
-      const queries = [{
-          $match: {
-            userId: userId ? userId : {
-              '$exists': true
-            },
-            'saleTime': {
-              // 这里需要加上new Date() mongodb才能解析日期
-              '$gte': new Date(startTime),
-              // '$lt': endTime ? new Date(endTime) : new Date()
-            }
-          }
-        },
-        {
-          $group: {
-            '_id': null,
-            'totalPrice': {
-              '$sum': '$ordersTotalPrice'
-            },
-            'saleNumber': {
-              $sum: 1
-            }
-          }
-        },
-      ];
-      if (groupId) {
-        queries[0]['$match'].groupId = groupId;
-        delete queries[0]['$match'].userId;
-      }
-      const total = await this.ctx.model.Order.aggregate(queries);
+    })
 
-      return total[0] || {
-        _id: null,
-        totalCount: 0,
-        totalAmount: 0,
-        saleNumber: 0
-      };
-    } catch (err) {
-      console.log('error in mongodb:', err);
+    const result = await Promise.all(days.map(async day => {
+      const fn = async () => {
+
+        let order = await this.getOrderList({
+          fromTime: day.fromTime,
+          endTime: day.endTime
+        }) || {}
+
+        order = {
+          total: order.total || 0,
+          totalPrice: order.totalPrice || 0,
+          date: day.date
+        }
+        return order
+      }
+      return fn()
+    }))
+
+    return result
+
+
+    // const result = days.map(async (item, index) => {
+    //   const date = moment(monthStartDate).add(index, 'days')
+    //   const startDate = moment(date).startOf('day').format()
+    //   const endDate = moment(date).startOf('day').format()
+    //   return await ctx.model.Order.find({
+    //     saleTime: {
+    //       '$gte': startDate,
+    //       '$lt': endDate
+    //     }
+    //   })
+    // })
+
+    // const arr = days.map((item, index) => {
+    //   const date = moment(monthStartDate).add(index, 'days')
+    //   const startDate = moment(date).startOf('day').format()
+    //   const endDate = moment(date).endOf('day').format()
+    //   return  ctx.model.Order.find({
+    //     saleTime: {
+    //       '$gte': startDate,
+    //       '$lt': endDate
+    //     }
+    //   })
+    // })
+
+    // const result =  await Promise.all(arr)
+
+
+
+    return 1
+
+
+
+    const {
+      userId,
+      startTime,
+      endTime
+    } = params;
+    const userRole = await this.ctx.service.user.getUserRoleById(params.userId);
+    let groupId;
+    if (userRole === 'superAdmin') {
+      const userInfo = await this.ctx.service.user.findUserById(userId);
+      groupId = userInfo.groupId;
     }
+    const queries = [{
+        $match: {
+          userId: userId ? userId : {
+            '$exists': true
+          },
+          'saleTime': {
+            // 这里需要加上new Date() mongodb才能解析日期
+            '$gte': new Date(startTime),
+            // '$lt': endTime ? new Date(endTime) : new Date()
+          }
+        }
+      },
+      {
+        $group: {
+          '_id': null,
+          'totalPrice': {
+            '$sum': '$ordersTotalPrice'
+          },
+          'saleNumber': {
+            $sum: 1
+          }
+        }
+      },
+    ];
+    if (groupId) {
+      queries[0]['$match'].groupId = groupId;
+      delete queries[0]['$match'].userId;
+    }
+    const total = await this.ctx.model.Order.aggregate(queries);
+
+    return total[0] || {
+      _id: null,
+      totalCount: 0,
+      totalAmount: 0,
+      saleNumber: 0
+    };
   }
 
   async getOrderDetailByOrderId(orderId) {

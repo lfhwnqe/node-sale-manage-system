@@ -73,6 +73,17 @@ const modelDict = {
         label: '价格',
         type: Number,
         require: true
+      },
+      // 出售时间
+      saleTime: {
+        require: true,
+        type: Date,
+        // default: Date.now,
+      },
+      // 订单所属组织Id
+      groupId: {
+        type: String,
+        require: true
       }
     }
   },
