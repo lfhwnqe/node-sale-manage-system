@@ -1,5 +1,38 @@
 'use strict';
 const modelDict = {
+  userDict: {
+    schema: {
+      username: {
+        type: String,
+        require: true,
+        max: 32,
+        min: [0, '必须输入账号名'],
+        unique: true
+      },
+      password: {
+        type: String,
+        require: true,
+        min: [0, '必须输入密码'],
+        max: 32
+      },
+      userLabel: {
+        type: String,
+        require: true,
+        min: [0, '必须输入用户名'],
+      },
+      // 用户的角色
+      role: {
+        type: String,
+        require: true,
+        default: 'baseUser'
+      },
+      // 用户所在组织
+      groupId: {
+        type: String,
+        require: true
+      }
+    }
+  },
   orderDict: {
     schema: {
       // ordersList: [{

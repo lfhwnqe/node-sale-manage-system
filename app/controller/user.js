@@ -7,28 +7,19 @@ class UserController extends Controller {
     const {
       ctx
     } = this;
-    const username = ctx.request.body.username;
-    const password = ctx.request.body.password;
-    const userLabel = ctx.request.body.userLabel;
-    const adminId = ctx.userinfo;
-    if (!username || !password) {
-      throw new Error('参数缺失');
-      return;
-    } else {
-      await ctx.service.user.createUser({
-        username,
-        password,
-        userLabel,
-        adminId
-      });
-      ctx.cookies.set('userinfo', username, {
-        maxAge: 1000 * 60 * 30,
-        encrypt: true
-      });
-      ctx.body = {
-        success: true
-      };
-    }
+    const params = ctx.request.body;
+    params.adminId = ctx.userinfo;
+    // 防止用户生成admin账号
+    params.role = '';
+
+    const data = await ctx.service.user.createUser(params);
+
+    const username = data.username;
+
+    ctx.body = {
+      data: username,
+      success: true
+    };
   }
 
   async findUserListByGroup() {

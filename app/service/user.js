@@ -13,22 +13,17 @@ class UserService extends Service {
   }
 
   async createUser({
-    username,
-    password,
-    userLabel,
-    role = 'baseUser',
-    groupId,
-    adminId
-  }) {
-    const user = new this.ctx.model.User();
-    const userIsExist = await this.ctx.model.User.findOne({
-      username,
-    });
-    if (userIsExist) throw new Error('用户名已存在');
+                     username,
+                     password,
+                     userLabel,
+                     role = 'baseUser',
+                     groupId,
+                     adminId
+                   }) {
     if (adminId) {
-      const user = await this.findUserById(adminId);
-      groupId = user.groupId;
+      groupId = await this.getUserGroupId(adminId);
     }
+    const user = new this.ctx.model.User();
     user.username = username;
     user.password = password;
     user.userLabel = userLabel;
@@ -87,8 +82,8 @@ class UserService extends Service {
   async getUserGroupId(userId) {
     const userData = await this.ctx.model.User.findOne({
       _id: userId
-    })
-    const result = userData.groupId
+    });
+    const result = userData.groupId;
     return result;
   }
 }

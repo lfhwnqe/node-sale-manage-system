@@ -25,11 +25,11 @@ class OrderService extends Service {
       params.groupId = groupId;
       params.saleBy = saleBy;
       if (params.ordersList) {
-        let ordersTotalPrice = 0
+        let ordersTotalPrice = 0;
         params.ordersList.forEach(item => {
-          ordersTotalPrice += item.price
-        })
-        params.ordersTotalPrice = ordersTotalPrice
+          ordersTotalPrice += item.price;
+        });
+        params.ordersTotalPrice = ordersTotalPrice;
       }
 
       const insertOrderResult = await ctx.model.Order.create(params);
@@ -44,7 +44,7 @@ class OrderService extends Service {
           littleOrder.number = item.number;
           littleOrder.price = item.price;
           littleOrder.orderId = orderId;
-          littleOrder.saleTime = params.saleTime
+          littleOrder.saleTime = params.saleTime;
           littleOrder.groupId = groupId;
           return littleOrder.save();
         }));
@@ -63,6 +63,8 @@ class OrderService extends Service {
     const orderData = await this.getOrderDetailByOrderId(orderId);
     if (!orderData) throw new Error('没有该订单');
     if (userData.role !== 'superAdmin' || userData.groupId !== orderData.groupId) throw new Error('没有权限');
+    // 删除子订单
+    await this.ctx.model.LittleOrder.remove({ orderId });
     const data = await this.ctx.model.Order.remove({
       _id: orderId
     });
@@ -108,7 +110,7 @@ class OrderService extends Service {
             // '$lt': moment(params[key]).add(8, 'hours')
           };
         } else {
-          queryForm['saleTime']['$lt'] = new Date(params['endTime'])
+          queryForm['saleTime']['$lt'] = new Date(params['endTime']);
           // queryForm['saleTime']['$lt'] = params['endTime']
         }
       }
@@ -126,14 +128,14 @@ class OrderService extends Service {
       const skip = (pageNum * 1 - 1) * pageSize;
       const orderList = await this.ctx.model.Order.find(queryForm).sort({
         saleTime: -1
-      }).limit(pageSize * 1).skip(skip)
+      }).limit(pageSize * 1).skip(skip);
 
       const total = await this.ctx.model.Order.find(queryForm).countDocuments();
       const totalPage = total / pageSize;
       /** 获取当前查询条件下订单数量，总收入统计 **/
       const revenueStaticsQuery = [{
-          $match: queryForm
-        },
+        $match: queryForm
+      },
         {
           $group: {
             '_id': null,
@@ -168,22 +170,22 @@ class OrderService extends Service {
   async totalRevenueStatics(params) {
     const {
       ctx
-    } = this
-    const time = moment().utc().format()
-    const monthStartDate = moment(time).startOf('month').format()
-    const date = moment().date()
-    let days = new Array(date).fill({})
+    } = this;
+    const time = moment().utc().format();
+    const monthStartDate = moment(time).startOf('month').format();
+    const date = moment().date();
+    let days = new Array(date).fill({});
     // let days = new Array(1).fill({})
     days = days.map((item, index) => {
-      const date = moment(monthStartDate).add(index, 'days').format()
-      const fromTime = moment(date).startOf('day').format()
-      const endTime = moment(date).endOf('day').format()
+      const date = moment(monthStartDate).add(index, 'days').format();
+      const fromTime = moment(date).startOf('day').format();
+      const endTime = moment(date).endOf('day').format();
       return {
         date,
         fromTime,
         endTime
-      }
-    })
+      };
+    });
 
     const result = await Promise.all(days.map(async day => {
       const fn = async () => {
@@ -191,19 +193,19 @@ class OrderService extends Service {
         let order = await this.getOrderList({
           fromTime: day.fromTime,
           endTime: day.endTime
-        }) || {}
+        }) || {};
 
         order = {
           total: order.total || 0,
           totalPrice: order.totalPrice || 0,
           date: day.date
-        }
-        return order
-      }
-      return fn()
-    }))
+        };
+        return order;
+      };
+      return fn();
+    }));
 
-    return result
+    return result;
 
 
     // const result = days.map(async (item, index) => {
@@ -233,9 +235,7 @@ class OrderService extends Service {
     // const result =  await Promise.all(arr)
 
 
-
-    return 1
-
+    return 1;
 
 
     const {
@@ -250,17 +250,17 @@ class OrderService extends Service {
       groupId = userInfo.groupId;
     }
     const queries = [{
-        $match: {
-          userId: userId ? userId : {
-            '$exists': true
-          },
-          'saleTime': {
-            // 这里需要加上new Date() mongodb才能解析日期
-            '$gte': new Date(startTime),
-            // '$lt': endTime ? new Date(endTime) : new Date()
-          }
+      $match: {
+        userId: userId ? userId : {
+          '$exists': true
+        },
+        'saleTime': {
+          // 这里需要加上new Date() mongodb才能解析日期
+          '$gte': new Date(startTime),
+          // '$lt': endTime ? new Date(endTime) : new Date()
         }
-      },
+      }
+    },
       {
         $group: {
           '_id': null,
