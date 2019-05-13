@@ -28,11 +28,9 @@ class LittleOrderService extends Service {
     ];
     const role = await ctx.service.user.getUserRoleById(ctx.userinfo);
     if (role === 'superAdmin') {
-      console.log('superAdmin')
       groupId = await ctx.service.user.getUserGroupId(ctx.userinfo);
       queries[0].$match.groupId = groupId;
-    } else if (role === 'baseUser') {
-      console.log('baseUser')
+    } else {
       queries[0].$match.userId = ctx.userinfo;
     }
     if (params.productType) {
@@ -63,8 +61,6 @@ class LittleOrderService extends Service {
         queries[0].$match['saleTime']['$lt'] = new Date(params['endTime']);
       }
     }
-    console.log(queries[0]);
-
     const result = await ctx.model.LittleOrder.aggregate(queries);
     return result[0] || {
       totalPrice: 0,
