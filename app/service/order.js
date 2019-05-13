@@ -44,6 +44,7 @@ class OrderService extends Service {
           littleOrder.number = item.number;
           littleOrder.price = item.price;
           littleOrder.orderId = orderId;
+          littleOrder.userId = ctx.userinfo;
           littleOrder.saleTime = params.saleTime;
           littleOrder.groupId = groupId;
           return littleOrder.save();
@@ -175,7 +176,6 @@ class OrderService extends Service {
     const monthStartDate = moment(time).startOf('month').format();
     const date = moment().date();
     let days = new Array(date).fill({});
-    // let days = new Array(1).fill({})
     days = days.map((item, index) => {
       const date = moment(monthStartDate).add(index, 'days').format();
       const fromTime = moment(date).startOf('day').format();
@@ -206,85 +206,6 @@ class OrderService extends Service {
     }));
 
     return result;
-
-
-    // const result = days.map(async (item, index) => {
-    //   const date = moment(monthStartDate).add(index, 'days')
-    //   const startDate = moment(date).startOf('day').format()
-    //   const endDate = moment(date).startOf('day').format()
-    //   return await ctx.model.Order.find({
-    //     saleTime: {
-    //       '$gte': startDate,
-    //       '$lt': endDate
-    //     }
-    //   })
-    // })
-
-    // const arr = days.map((item, index) => {
-    //   const date = moment(monthStartDate).add(index, 'days')
-    //   const startDate = moment(date).startOf('day').format()
-    //   const endDate = moment(date).endOf('day').format()
-    //   return  ctx.model.Order.find({
-    //     saleTime: {
-    //       '$gte': startDate,
-    //       '$lt': endDate
-    //     }
-    //   })
-    // })
-
-    // const result =  await Promise.all(arr)
-
-
-    return 1;
-
-
-    const {
-      userId,
-      startTime,
-      endTime
-    } = params;
-    const userRole = await this.ctx.service.user.getUserRoleById(params.userId);
-    let groupId;
-    if (userRole === 'superAdmin') {
-      const userInfo = await this.ctx.service.user.findUserById(userId);
-      groupId = userInfo.groupId;
-    }
-    const queries = [{
-      $match: {
-        userId: userId ? userId : {
-          '$exists': true
-        },
-        'saleTime': {
-          // 这里需要加上new Date() mongodb才能解析日期
-          '$gte': new Date(startTime),
-          // '$lt': endTime ? new Date(endTime) : new Date()
-        }
-      }
-    },
-      {
-        $group: {
-          '_id': null,
-          'totalPrice': {
-            '$sum': '$ordersTotalPrice'
-          },
-          'saleNumber': {
-            $sum: 1
-          }
-        }
-      },
-    ];
-    if (groupId) {
-      queries[0]['$match'].groupId = groupId;
-      delete queries[0]['$match'].userId;
-    }
-    const total = await this.ctx.model.Order.aggregate(queries);
-
-    return total[0] || {
-      _id: null,
-      totalCount: 0,
-      totalAmount: 0,
-      saleNumber: 0
-    };
   }
 
   async getOrderDetailByOrderId(orderId) {

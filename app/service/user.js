@@ -9,14 +9,14 @@ class UserService extends Service {
       password
     });
     if (!user) throw new Error('用户不存在');
-    return user.id;
+    return user;
   }
 
   async createUser({
                      username,
                      password,
                      userLabel,
-                     role = 'baseUser',
+                     role,
                      groupId,
                      adminId
                    }) {
@@ -27,7 +27,7 @@ class UserService extends Service {
     user.username = username;
     user.password = password;
     user.userLabel = userLabel;
-    user.role = role;
+    user.role = role || 'baseUser';
     user.groupId = groupId;
     return user.save();
   }

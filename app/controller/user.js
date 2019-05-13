@@ -69,7 +69,7 @@ class UserController extends Controller {
       const hasUser = await ctx.service.user.login(username, password);
       if (hasUser) {
         const data = await ctx.service.user.findUserById(hasUser, 'userLabel role groupId');
-        ctx.cookies.set('userinfo', hasUser, {
+        ctx.cookies.set('userinfo', hasUser.id, {
           maxAge: 1000 * 60 * 30,
           encrypt: true
         });

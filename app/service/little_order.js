@@ -8,15 +8,14 @@ class LittleOrderService extends Service {
   async getStatics(params) {
     const {
       ctx
-    } = this
+    } = this;
+    let groupId;
 
-    const groupId = await ctx.service.user.getUserGroupId(ctx.userinfo)
+    const role = await ctx.service.user.getUserRoleById(ctx.userinfo);
 
     const queries = [{
-        $match: {
-          groupId
-        }
-      },
+      $match: {}
+    },
       {
         $group: {
           '_id': null,
@@ -28,12 +27,20 @@ class LittleOrderService extends Service {
           }
         }
       }
-    ]
+    ];
+    console.log('role:', role);
+
+    if (role === 'superAdmin') {
+      groupId = await ctx.service.user.getUserGroupId(ctx.userinfo);
+      queries[0].$match.groupId = groupId;
+    } else if (role === 'baseUser') {
+      queries[0].$match.userId = ctx.userinfo;
+    }
     if (params.productType) {
-      queries[0].$match.productType = params.productType
+      queries[0].$match.productType = params.productType;
     }
     if (params.product) {
-      queries[0].$match.product = params.product
+      queries[0].$match.product = params.product;
     }
 
 
@@ -54,23 +61,24 @@ class LittleOrderService extends Service {
           // '$lt': moment(params[key]).add(8, 'hours')
         };
       } else {
-        queries[0].$match['saleTime']['$lt'] = new Date(params['endTime'])
+        queries[0].$match['saleTime']['$lt'] = new Date(params['endTime']);
       }
     }
+    console.log(queries[0]);
 
-    const result = await ctx.model.LittleOrder.aggregate(queries)
+    const result = await ctx.model.LittleOrder.aggregate(queries);
     return result[0] || {
       totalPrice: 0,
       totalNum: 0
-    }
+    };
   }
 
   async getList(params) {
     const {
       ctx
-    } = this
-    const result = await ctx.model.LittleOrder.find(params)
-    return result
+    } = this;
+    const result = await ctx.model.LittleOrder.find(params);
+    return result;
   }
 }
 

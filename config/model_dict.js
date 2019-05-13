@@ -117,6 +117,11 @@ const modelDict = {
       groupId: {
         type: String,
         require: true
+      },
+      userId: {
+        type: String,
+        require: true,
+        label: '创建订单的用户id'
       }
     }
   },
