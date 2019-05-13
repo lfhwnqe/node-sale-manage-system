@@ -11,8 +11,6 @@ class LittleOrderService extends Service {
     } = this;
     let groupId;
 
-    const role = await ctx.service.user.getUserRoleById(ctx.userinfo);
-
     const queries = [{
       $match: {}
     },
@@ -28,12 +26,13 @@ class LittleOrderService extends Service {
         }
       }
     ];
-    console.log('role:', role);
-
+    const role = await ctx.service.user.getUserRoleById(ctx.userinfo);
     if (role === 'superAdmin') {
+      console.log('superAdmin')
       groupId = await ctx.service.user.getUserGroupId(ctx.userinfo);
       queries[0].$match.groupId = groupId;
     } else if (role === 'baseUser') {
+      console.log('baseUser')
       queries[0].$match.userId = ctx.userinfo;
     }
     if (params.productType) {
