@@ -32,8 +32,18 @@ class OrderService extends Service {
         params.ordersTotalPrice = ordersTotalPrice;
       }
 
-      const insertOrderResult = await ctx.model.Order.create(params);
-      const orderId = insertOrderResult.id;
+      const order = new ctx.model.Order();
+      order.phone = params.phone;
+      order.ordersTotalPrice = params.ordersTotalPrice;
+      order.saleTime = params.saleTime;
+      order.remark = params.remark;
+      order.userId = params.userId;
+      order.saleBy = params.saleBy;
+      order.groupId = params.groupId;
+      // console.log('order order order order:', order);
+
+      // const insertOrderResult = await ctx.model.Order.create(params);
+      // const orderId = insertOrderResult.id;
 
       if (params.ordersList) {
         // 依次生成子订单
@@ -43,15 +53,16 @@ class OrderService extends Service {
           littleOrder.product = item.product;
           littleOrder.number = item.number;
           littleOrder.price = item.price;
-          littleOrder.orderId = orderId;
+          littleOrder.orderId = order._id;
           littleOrder.userId = ctx.userinfo;
           littleOrder.saleTime = params.saleTime;
           littleOrder.groupId = groupId;
           return littleOrder.save();
         }));
       }
+      order.save()
 
-      return orderId;
+      return order;
     } catch (err) {
       throw new Error(err);
     }
