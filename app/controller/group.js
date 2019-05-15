@@ -14,10 +14,7 @@ class GroupController extends Controller {
     if (role !== 'superAdmin') throw new Error('没有权限');
     const { groupId } = ctx.request.body;
     const data = await ctx.service.group.setUserInGroupByUserId(groupId, userId);
-    ctx.body = {
-      success: true,
-      data
-    };
+    ctx.returnSuccess(data);
   }
 
   async createGroup() {
@@ -29,10 +26,7 @@ class GroupController extends Controller {
     if (role !== 'superAdmin') throw new Error('没有权限');
     const { groupName } = ctx.request.body;
     const data = await ctx.service.group.createGroup(groupName);
-    ctx.body = {
-      success: true,
-      data
-    };
+    ctx.returnSuccess(data);
   }
 
 }

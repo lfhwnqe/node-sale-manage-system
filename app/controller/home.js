@@ -22,10 +22,7 @@ class HomeController extends Controller {
     } = this;
     const data = await ctx.service.order.totalRevenueStatics();
 
-    ctx.body = {
-      success: true,
-      data
-    };
+    ctx.returnSuccess(data);
   }
 }
 

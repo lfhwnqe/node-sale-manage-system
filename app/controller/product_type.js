@@ -11,10 +11,7 @@ class ProductTypeController extends Controller {
       const params = ctx.request.body
       const form = ctx.helper.validateByModelDict(params, 'productTypeDict')
       const data = await ctx.service.productType.insert(form)
-      ctx.body = {
-        data,
-        success: true
-      }
+      ctx.returnSuccess(data);
     } catch (err) {
       if (err.message.indexOf('E11000 duplicate key') !== -1) {
         err = new Error('请勿添加重复的产品类型或产品类型简写')
@@ -31,10 +28,7 @@ class ProductTypeController extends Controller {
     try {
       const params = ctx.request.body
       const data = await ctx.service.productType.getList(params)
-      ctx.body = {
-        data,
-        success: true
-      }
+      ctx.returnSuccess(data);
     } catch (err) {
 
     }
@@ -47,10 +41,7 @@ class ProductTypeController extends Controller {
     try {
       const params = ctx.request.body
       const data = await ctx.service.productType.removeById(params.id)
-      ctx.body = {
-        data,
-        success: true
-      }
+      ctx.returnSuccess(data);
     } catch (err) {
 
     }

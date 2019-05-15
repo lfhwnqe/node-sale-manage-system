@@ -9,11 +9,8 @@ class LittleOrderController extends Controller {
       ctx
     } = this;
     const params = ctx.request.query;
-    const result = await ctx.service.littleOrder.getStatics(params);
-    ctx.body = {
-      data: result,
-      success: true
-    };
+    const data = await ctx.service.littleOrder.getStatics(params);
+    ctx.returnSuccess(data);
   }
 }
 

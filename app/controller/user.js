@@ -50,10 +50,7 @@ class UserController extends Controller {
       role,
       groupId
     });
-    ctx.body = {
-      data,
-      success: true
-    };
+    ctx.returnSuccess(data);
   }
 
   async login() {
@@ -73,10 +70,7 @@ class UserController extends Controller {
           maxAge: 1000 * 60 * 30,
           encrypt: true
         });
-        ctx.body = {
-          data,
-          success: true,
-        };
+        ctx.returnSuccess(data);
 
       } else {
         ctx.body = {
@@ -92,19 +86,13 @@ class UserController extends Controller {
       ctx
     } = this;
     const user = await ctx.model.User.find({});
-    ctx.body = {
-      data: user,
-      success: true
-    };
+    ctx.returnSuccess(data);
   }
 
   async getSaleByList() {
     const userId = this.ctx.userinfo;
     const data = await this.ctx.service.user.getSaleByList(userId);
-    this.ctx.body = {
-      data,
-      success: true
-    };
+    this.ctx.returnSuccess(data);
   }
 }
 
