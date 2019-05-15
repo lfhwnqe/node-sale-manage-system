@@ -1,9 +1,11 @@
 module.exports = {
   returnSuccess(data = {}, msg = '') {
-    this.body = {
+    const form = {
       success: true,
       msg,
       data
     };
+    this.logger.info('request send data is:', form);
+    this.body = form;
   },
 };
